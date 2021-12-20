@@ -131,15 +131,15 @@ class XPBarOverlay extends Overlay
 			return null;
 		}
 
-		final Point offsetLeft = curViewport.getOffsetLeft();
+		final Point offset = curViewport.getOffsetLeft();
 		final Point location = curWidget.getCanvasLocation();
-		final int height, offsetLeftBarX, offsetLeftBarY;
+		final int height, offsetBarX, offsetBarY;
 
 		height = HEIGHT;
-		offsetLeftBarX = (location.getX() - offsetLeft.getX());
-		offsetLeftBarY = (location.getY() - offsetLeft.getY());
+		offsetBarX = (location.getX() - offset.getX());
+		offsetBarY = (location.getY() - offset.getY());
 
-		renderBar(g, offsetLeftBarX, offsetLeftBarY, height);
+		renderBar(g, offsetBarX, offsetBarY, height);
 		return null;
 	}
 
@@ -149,10 +149,17 @@ class XPBarOverlay extends Overlay
 		currentLevel = Experience.getLevelForXp(currentXP);
 		nextLevelXP = Experience.getXpForLevel(currentLevel + 1);
 		int currentLevelXP = Experience.getXpForLevel(currentLevel);
+		boolean isTransparentChatbox = client.getVar(Varbits.TRANSPARENT_CHATBOX) == 1;
 
-		int adjustedX = client.isResized() ? x - 4 : x;
-		int adjustedY = client.isResized() ? y + 7: y;
-		int adjustedWidth = client.isResized() ? WIDTH + 7 : WIDTH;
+		int adjustedX = x;
+		int adjustedY = y;
+		int adjustedWidth = WIDTH;
+
+		if (client.isResized()){
+			adjustedX = x - 4;
+			adjustedWidth = WIDTH + 7;
+		}
+		adjustedY = client.isResized() && isTransparentChatbox ? y + 7: y;
 
 		final int filledWidth = getBarWidth(nextLevelXP - currentLevelXP, currentXP - currentLevelXP, adjustedWidth);
 
