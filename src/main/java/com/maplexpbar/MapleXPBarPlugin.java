@@ -82,7 +82,6 @@ class XPBarOverlay extends Overlay
 	private Client client;
 	private static final Logger logger = LoggerFactory.getLogger(XPBarOverlay.class);
 	private static final Color BACKGROUND = new Color(0, 0, 0, 255);
-	private static final Color NOTCH_COLOR = new Color(255, 255, 255, 100);
 	private static final int WIDTH = 512;
 	static final int HEIGHT = 4;
 	private static final int BORDER_SIZE = 1;
@@ -139,20 +138,26 @@ class XPBarOverlay extends Overlay
 		offsetBarX = (location.getX() - offset.getX());
 		offsetBarY = (location.getY() - offset.getY());
 
-		renderBar(g, offsetBarX, offsetBarY, height);
+		if (config.displayHealthAndPrayer())
+			renderThreeBars(g, offsetBarX, offsetBarY, height);
+		else
+			renderBar(g, offsetBarX, offsetBarY, height);
+
 		return null;
 	}
 
 	public void renderBar(Graphics2D graphics, int x, int y, int height)
 	{
+		//Get info for experience
 		currentXP = client.getSkillExperience(config.skill());
 		currentLevel = Experience.getLevelForXp(currentXP);
 		nextLevelXP = Experience.getXpForLevel(currentLevel + 1);
 		int currentLevelXP = Experience.getXpForLevel(currentLevel);
 		boolean isTransparentChatbox = client.getVar(Varbits.TRANSPARENT_CHATBOX) == 1;
 
+		//Calc starting position for bar
 		int adjustedX = x;
-		int adjustedY = y;
+		int adjustedY;
 		int adjustedWidth = WIDTH;
 
 		if (client.isResized()){
@@ -163,34 +168,86 @@ class XPBarOverlay extends Overlay
 
 		final int filledWidth = getBarWidth(nextLevelXP - currentLevelXP, currentXP - currentLevelXP, adjustedWidth);
 
+		//Format tooltip display
 		NumberFormat f = NumberFormat.getNumberInstance(Locale.US);
 		String xpText = f.format(currentXP) + "/" + f.format(nextLevelXP);
 
 		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() >= adjustedY
 				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + HEIGHT;
 
-		if (hoveringBar) graphics.drawString(xpText, (adjustedWidth/2) - (xpText.length()*3), adjustedY);
+		if (hoveringBar) graphics.drawString(xpText, (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY);
+
+		//Render the overlay
+		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidth, config.colorXP(), config.colorXPNotches());
+	}
+
+	public void renderThreeBars(Graphics2D graphics, int x, int y, int height)
+	{
+		//Get info for experience, health, and prayer
+		currentXP = client.getSkillExperience(config.skill());
+		currentLevel = Experience.getLevelForXp(currentXP);
+		nextLevelXP = Experience.getXpForLevel(currentLevel + 1);
+		int currentLevelXP = Experience.getXpForLevel(currentLevel);
+
+		int currentHP = client.getBoostedSkillLevel(Skill.HITPOINTS);
+		int maxHP = client.getRealSkillLevel(Skill.HITPOINTS);
+		int currentPray = client.getBoostedSkillLevel(Skill.PRAYER);
+		int maxPray = client.getRealSkillLevel(Skill.PRAYER);
+
+		boolean isTransparentChatbox = client.getVar(Varbits.TRANSPARENT_CHATBOX) == 1;
+
+		//Calc starting positions for bars
+		int adjustedX = x;
+		int adjustedY;
+		int adjustedWidth = WIDTH;
+
+		if (client.isResized()){
+			adjustedX = x - 4;
+			adjustedWidth = WIDTH + 7;
+		}
+		adjustedY = client.isResized() && isTransparentChatbox ? y + 7: y;
+
+		final int filledWidthXP = getBarWidth(nextLevelXP - currentLevelXP, currentXP - currentLevelXP, adjustedWidth);
+		final int filledWidthHP = getBarWidth(maxHP, currentHP, adjustedWidth);
+		final int filledWidthPray = getBarWidth(maxPray, currentPray, adjustedWidth);
+
+		//Format tooltip display
+		NumberFormat f = NumberFormat.getNumberInstance(Locale.US);
+		String xpText = f.format(currentXP) + "/" + f.format(nextLevelXP);
+
+		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() >= adjustedY
+				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + HEIGHT;
+
+		if (hoveringBar) graphics.drawString(xpText, (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY-(HEIGHT*2));
+
+		//Render the overlays
+		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthXP, config.colorXP(), config.colorXPNotches());
+		drawBar(graphics, adjustedX, adjustedY-HEIGHT, adjustedWidth, filledWidthPray, config.colorPray(), config.colorPrayNotches());
+		drawBar(graphics, adjustedX, adjustedY-(HEIGHT*2), adjustedWidth, filledWidthHP, config.colorHP(), config.colorHPNotches());
+	}
+
+	private void drawBar(Graphics graphics, int adjustedX, int adjustedY, int adjustedWidth, int fill, Color barColor, Color notchColor){
 
 		graphics.setColor(BACKGROUND);
 		graphics.drawRect(adjustedX, adjustedY, adjustedWidth - BORDER_SIZE, HEIGHT - BORDER_SIZE);
 		graphics.fillRect(adjustedX, adjustedY, adjustedWidth, HEIGHT);
 
-		graphics.setColor(config.color());
+		graphics.setColor(barColor);
 		graphics.fillRect(adjustedX + BORDER_SIZE,
 				adjustedY + BORDER_SIZE,
-				filledWidth - BORDER_SIZE * 2,
+				fill - BORDER_SIZE * 2,
 				HEIGHT - BORDER_SIZE * 2);
 
-		graphics.setColor(NOTCH_COLOR);
-		graphics.fillRect(adjustedX + 1 * (adjustedWidth/10), adjustedY,2, HEIGHT);
-		graphics.fillRect(adjustedX + 2 * (adjustedWidth/10), adjustedY,2, HEIGHT);
-		graphics.fillRect(adjustedX + 3 * (adjustedWidth/10), adjustedY,2, HEIGHT);
-		graphics.fillRect(adjustedX + 4 * (adjustedWidth/10), adjustedY,2, HEIGHT);
-		graphics.fillRect(adjustedX + 5 * (adjustedWidth/10), adjustedY,2, HEIGHT);
-		graphics.fillRect(adjustedX + 6 * (adjustedWidth/10), adjustedY,2, HEIGHT);
-		graphics.fillRect(adjustedX + 7 * (adjustedWidth/10), adjustedY,2, HEIGHT);
-		graphics.fillRect(adjustedX + 8 * (adjustedWidth/10), adjustedY,2, HEIGHT);
-		graphics.fillRect(adjustedX + 9 * (adjustedWidth/10), adjustedY,2, HEIGHT);
+		graphics.setColor(notchColor);
+		graphics.fillRect(adjustedX + 1 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
+		graphics.fillRect(adjustedX + 2 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
+		graphics.fillRect(adjustedX + 3 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
+		graphics.fillRect(adjustedX + 4 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
+		graphics.fillRect(adjustedX + 5 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
+		graphics.fillRect(adjustedX + 6 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
+		graphics.fillRect(adjustedX + 7 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
+		graphics.fillRect(adjustedX + 8 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
+		graphics.fillRect(adjustedX + 9 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
 
 	}
 
