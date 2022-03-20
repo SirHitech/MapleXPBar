@@ -8,7 +8,7 @@ import net.runelite.client.config.ConfigItem;
 
 import java.awt.*;
 
-@ConfigGroup("example")
+@ConfigGroup("MapleXP")
 public interface MapleXPBarConfig extends Config
 {
 	@ConfigItem(
@@ -24,6 +24,14 @@ public interface MapleXPBarConfig extends Config
 
 	@ConfigItem(
 			position = 1,
+			keyName = "mostRecentSkill",
+			name = "Show Most Recent Skill",
+			description = "Display bar of the most recently skill with xp gain"
+	)
+	default boolean mostRecentSkill() { return false; }
+
+	@ConfigItem(
+			position = 2,
 			keyName = "displayHealthAndPrayer",
 			name = "Display Health And Prayer",
 			description = "Also shows a health and prayer bar"
@@ -32,7 +40,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 2,
+			position = 3,
 			keyName = "hpbarColor",
 			name = "HP Bar Color",
 			description = "Configures the color of the HP bar"
@@ -44,7 +52,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 4,
+			position = 5,
 			keyName = "praybarColor",
 			name = "Prayer Bar Color",
 			description = "Configures the color of the Prayer bar"
@@ -56,7 +64,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 6,
+			position = 7,
 			keyName = "xpbarColor",
 			name = "XP Progress Bar Color",
 			description = "Configures the color of the XP bar"
@@ -68,7 +76,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 3,
+			position = 4,
 			keyName = "hpbarNotchColor",
 			name = "HP Notch Color",
 			description = "Configures the color of the HP bar notches"
@@ -80,7 +88,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 5,
+			position = 6,
 			keyName = "praybarNotchColor",
 			name = "Prayer Notch Color",
 			description = "Configures the color of the Prayer bar notches"
@@ -92,7 +100,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 7,
+			position = 8,
 			keyName = "xpbarNotchColor",
 			name = "XP Notch Color",
 			description = "Configures the color of the XP bar notches"

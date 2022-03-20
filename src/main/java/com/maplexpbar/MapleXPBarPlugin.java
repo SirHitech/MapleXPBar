@@ -9,10 +9,12 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.Point;
+import net.runelite.api.events.StatChanged;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
@@ -23,6 +25,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 
 
 import net.runelite.client.ui.overlay.OverlayPosition;
+import org.pf4j.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +33,7 @@ import java.awt.*;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+@Extension
 @Slf4j
 @PluginDescriptor(
 	name = "Maple XP Bar"
@@ -54,15 +58,19 @@ public class MapleXPBarPlugin extends Plugin
 	@Getter(AccessLevel.PACKAGE)
 	private boolean barsDisplayed;
 
+	@Getter(AccessLevel.PACKAGE)
+	private Skill currentSkill;
+
 	@Override
-	protected void startUp() throws Exception
+	protected void startUp()
 	{
+		log.info("Louis Hong Plugin started");
 		overlayManager.add(overlay);
 		barsDisplayed = true;
 	}
 
 	@Override
-	protected void shutDown() throws Exception
+	protected void shutDown()
 	{
 		overlayManager.remove(overlay);
 		barsDisplayed = false;
@@ -72,6 +80,12 @@ public class MapleXPBarPlugin extends Plugin
 	MapleXPBarConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(MapleXPBarConfig.class);
+	}
+
+	@Subscribe
+	public void onStatChanged(StatChanged statChanged) {
+		log.info("State CHANGED: " + statChanged.getSkill());
+		currentSkill = statChanged.getSkill();
 	}
 }
 
@@ -107,6 +121,12 @@ class XPBarOverlay extends Overlay
 	public Dimension render(Graphics2D g)
 	{
 		if (!plugin.isBarsDisplayed())
+		{
+			return null;
+		}
+
+		// Hide bar when there are no recent skills, in most recent skill mode.
+		if (config.mostRecentSkill() && plugin.getCurrentSkill() == null)
 		{
 			return null;
 		}
@@ -149,7 +169,8 @@ class XPBarOverlay extends Overlay
 	public void renderBar(Graphics2D graphics, int x, int y, int height)
 	{
 		//Get info for experience
-		currentXP = client.getSkillExperience(config.skill());
+		Skill skill = config.mostRecentSkill() ? plugin.getCurrentSkill() : config.skill();
+		currentXP = client.getSkillExperience(skill);
 		currentLevel = Experience.getLevelForXp(currentXP);
 		nextLevelXP = Experience.getXpForLevel(currentLevel + 1);
 		int currentLevelXP = Experience.getXpForLevel(currentLevel);
@@ -184,7 +205,8 @@ class XPBarOverlay extends Overlay
 	public void renderThreeBars(Graphics2D graphics, int x, int y, int height)
 	{
 		//Get info for experience, health, and prayer
-		currentXP = client.getSkillExperience(config.skill());
+		Skill skill = config.mostRecentSkill() ? plugin.getCurrentSkill() : config.skill();
+		currentXP = client.getSkillExperience(skill);
 		currentLevel = Experience.getLevelForXp(currentXP);
 		nextLevelXP = Experience.getXpForLevel(currentLevel + 1);
 		int currentLevelXP = Experience.getXpForLevel(currentLevel);
