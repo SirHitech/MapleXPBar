@@ -52,30 +52,6 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 5,
-			keyName = "praybarColor",
-			name = "Prayer Bar Color",
-			description = "Configures the color of the Prayer bar"
-	)
-	default Color colorPray()
-	{
-		return Color.CYAN;
-	}
-
-	@Alpha
-	@ConfigItem(
-			position = 7,
-			keyName = "xpbarColor",
-			name = "XP Progress Bar Color",
-			description = "Configures the color of the XP bar"
-	)
-	default Color colorXP()
-	{
-		return Color.GREEN;
-	}
-
-	@Alpha
-	@ConfigItem(
 			position = 4,
 			keyName = "hpbarNotchColor",
 			name = "HP Notch Color",
@@ -84,6 +60,18 @@ public interface MapleXPBarConfig extends Config
 	default Color colorHPNotches()
 	{
 		return Color.LIGHT_GRAY;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 5,
+			keyName = "praybarColor",
+			name = "Prayer Bar Color",
+			description = "Configures the color of the Prayer bar"
+	)
+	default Color colorPray()
+	{
+		return Color.CYAN;
 	}
 
 	@Alpha
@@ -100,6 +88,18 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
+			position = 7,
+			keyName = "xpbarColor",
+			name = "XP Progress Bar Color",
+			description = "Configures the color of the XP bar"
+	)
+	default Color colorXP()
+	{
+		return Color.GREEN;
+	}
+
+	@Alpha
+	@ConfigItem(
 			position = 8,
 			keyName = "xpbarNotchColor",
 			name = "XP Notch Color",
@@ -109,4 +109,14 @@ public interface MapleXPBarConfig extends Config
 	{
 		return Color.LIGHT_GRAY;
 	}
+
+	@Alpha
+	@ConfigItem(
+			position = 9,
+			keyName = "xpbarSkillColor",
+			name = "XP Progressbar as skill color",
+			description = "Configure the latest skill color as the XP bar color"
+	)
+	default boolean mostRecentSkillColor() { return false; }
+
 }

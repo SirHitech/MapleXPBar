@@ -22,6 +22,7 @@ import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.SkillColor;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -210,7 +211,8 @@ class XPBarOverlay extends Overlay
 		if (hoveringBar) graphics.drawString(xpText, (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY);
 
 		//Render the overlay
-		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidth, config.colorXP(), config.colorXPNotches());
+		Color barColor = config.mostRecentSkillColor() ? SkillColor.find(plugin.getCurrentSkill()).getColor() : config.colorXP();
+		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidth, barColor, config.colorXPNotches());
 	}
 
 	public void renderThreeBars(Graphics2D graphics, int x, int y, int height)
