@@ -7,16 +7,22 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.*;
+import net.runelite.api.Client;
+import net.runelite.api.Experience;
+import net.runelite.api.Varbits;
 import net.runelite.api.Point;
+import net.runelite.api.Skill;
+import net.runelite.api.events.StatChanged;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.SkillColor;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -28,7 +34,9 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.text.NumberFormat;
+import java.util.EnumMap;
 import java.util.Locale;
+import java.util.Map;
 
 @Slf4j
 @PluginDescriptor(
@@ -54,15 +62,20 @@ public class MapleXPBarPlugin extends Plugin
 	@Getter(AccessLevel.PACKAGE)
 	private boolean barsDisplayed;
 
+	@Getter(AccessLevel.PACKAGE)
+	private Skill currentSkill;
+
+	private final Map<Skill, Integer> skillList = new EnumMap<>(Skill.class);
+
 	@Override
-	protected void startUp() throws Exception
+	protected void startUp()
 	{
 		overlayManager.add(overlay);
 		barsDisplayed = true;
 	}
 
 	@Override
-	protected void shutDown() throws Exception
+	protected void shutDown()
 	{
 		overlayManager.remove(overlay);
 		barsDisplayed = false;
@@ -72,6 +85,19 @@ public class MapleXPBarPlugin extends Plugin
 	MapleXPBarConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(MapleXPBarConfig.class);
+	}
+
+	@Subscribe
+	public void onStatChanged(StatChanged statChanged) {
+
+		Integer lastXP = skillList.put(statChanged.getSkill(), statChanged.getXp());
+
+		if (lastXP != null && lastXP != statChanged.getXp())
+		{
+			currentSkill = statChanged.getSkill();
+		}
+
+		log.info("State CHANGED: " + statChanged.getSkill());
 	}
 }
 
@@ -107,6 +133,12 @@ class XPBarOverlay extends Overlay
 	public Dimension render(Graphics2D g)
 	{
 		if (!plugin.isBarsDisplayed())
+		{
+			return null;
+		}
+
+		// Hide bar when there are no recent skills, in most recent skill mode.
+		if (config.mostRecentSkill() && plugin.getCurrentSkill() == null)
 		{
 			return null;
 		}
@@ -149,7 +181,8 @@ class XPBarOverlay extends Overlay
 	public void renderBar(Graphics2D graphics, int x, int y, int height)
 	{
 		//Get info for experience
-		currentXP = client.getSkillExperience(config.skill());
+		Skill skill = config.mostRecentSkill() ? plugin.getCurrentSkill() : config.skill();
+		currentXP = client.getSkillExperience(skill);
 		currentLevel = Experience.getLevelForXp(currentXP);
 		nextLevelXP = Experience.getXpForLevel(currentLevel + 1);
 		int currentLevelXP = Experience.getXpForLevel(currentLevel);
@@ -178,13 +211,15 @@ class XPBarOverlay extends Overlay
 		if (hoveringBar) graphics.drawString(xpText, (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY);
 
 		//Render the overlay
-		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidth, config.colorXP(), config.colorXPNotches());
+		Color barColor = config.mostRecentSkillColor() ? SkillColor.find(plugin.getCurrentSkill()).getColor() : config.colorXP();
+		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidth, barColor, config.colorXPNotches());
 	}
 
 	public void renderThreeBars(Graphics2D graphics, int x, int y, int height)
 	{
 		//Get info for experience, health, and prayer
-		currentXP = client.getSkillExperience(config.skill());
+		Skill skill = config.mostRecentSkill() ? plugin.getCurrentSkill() : config.skill();
+		currentXP = client.getSkillExperience(skill);
 		currentLevel = Experience.getLevelForXp(currentXP);
 		nextLevelXP = Experience.getXpForLevel(currentLevel + 1);
 		int currentLevelXP = Experience.getXpForLevel(currentLevel);
