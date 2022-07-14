@@ -7,8 +7,11 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.*;
+import net.runelite.api.Client;
+import net.runelite.api.Experience;
+import net.runelite.api.Varbits;
 import net.runelite.api.Point;
+import net.runelite.api.Skill;
 import net.runelite.api.events.StatChanged;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
@@ -19,21 +22,22 @@ import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.SkillColor;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 
 import net.runelite.client.ui.overlay.OverlayPosition;
-import org.pf4j.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.text.NumberFormat;
+import java.util.EnumMap;
 import java.util.Locale;
+import java.util.Map;
 
-@Extension
 @Slf4j
 @PluginDescriptor(
 	name = "Maple XP Bar"
@@ -61,10 +65,11 @@ public class MapleXPBarPlugin extends Plugin
 	@Getter(AccessLevel.PACKAGE)
 	private Skill currentSkill;
 
+	private final Map<Skill, Integer> skillList = new EnumMap<>(Skill.class);
+
 	@Override
 	protected void startUp()
 	{
-		log.info("Louis Hong Plugin started");
 		overlayManager.add(overlay);
 		barsDisplayed = true;
 	}
@@ -84,8 +89,15 @@ public class MapleXPBarPlugin extends Plugin
 
 	@Subscribe
 	public void onStatChanged(StatChanged statChanged) {
+
+		Integer lastXP = skillList.put(statChanged.getSkill(), statChanged.getXp());
+
+		if (lastXP != null && lastXP != statChanged.getXp())
+		{
+			currentSkill = statChanged.getSkill();
+		}
+
 		log.info("State CHANGED: " + statChanged.getSkill());
-		currentSkill = statChanged.getSkill();
 	}
 }
 
@@ -199,7 +211,8 @@ class XPBarOverlay extends Overlay
 		if (hoveringBar) graphics.drawString(xpText, (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY);
 
 		//Render the overlay
-		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidth, config.colorXP(), config.colorXPNotches());
+		Color barColor = config.mostRecentSkillColor() ? SkillColor.find(plugin.getCurrentSkill()).getColor() : config.colorXP();
+		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidth, barColor, config.colorXPNotches());
 	}
 
 	public void renderThreeBars(Graphics2D graphics, int x, int y, int height)
