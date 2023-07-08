@@ -38,9 +38,17 @@ public interface MapleXPBarConfig extends Config
 	)
 	default boolean displayHealthAndPrayer() { return false; }
 
-	@Alpha
 	@ConfigItem(
 			position = 3,
+			keyName = "showPercentage",
+			name = "Show XP Percentage",
+			description = "Also shows XP percentage when hovering over bar"
+	)
+	default boolean showPercentage() { return true; }
+
+	@Alpha
+	@ConfigItem(
+			position = 4,
 			keyName = "hpbarColor",
 			name = "HP Bar Color",
 			description = "Configures the color of the HP bar"
@@ -52,7 +60,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 4,
+			position = 5,
 			keyName = "hpbarNotchColor",
 			name = "HP Notch Color",
 			description = "Configures the color of the HP bar notches"
@@ -64,7 +72,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 5,
+			position = 6,
 			keyName = "praybarColor",
 			name = "Prayer Bar Color",
 			description = "Configures the color of the Prayer bar"
@@ -76,7 +84,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 6,
+			position = 7,
 			keyName = "praybarNotchColor",
 			name = "Prayer Notch Color",
 			description = "Configures the color of the Prayer bar notches"
@@ -88,7 +96,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 7,
+			position = 8,
 			keyName = "xpbarColor",
 			name = "XP Progress Bar Color",
 			description = "Configures the color of the XP bar"
@@ -100,7 +108,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 8,
+			position = 9,
 			keyName = "xpbarNotchColor",
 			name = "XP Notch Color",
 			description = "Configures the color of the XP bar notches"
@@ -112,7 +120,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 9,
+			position = 10,
 			keyName = "xpbarSkillColor",
 			name = "XP Progressbar as skill color",
 			description = "Configure the latest skill color as the XP bar color"
