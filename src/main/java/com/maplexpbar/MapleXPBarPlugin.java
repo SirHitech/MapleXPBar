@@ -204,6 +204,10 @@ class XPBarOverlay extends Overlay
 		//Format tooltip display
 		NumberFormat f = NumberFormat.getNumberInstance(Locale.US);
 		String xpText = f.format(currentXP) + "/" + f.format(nextLevelXP);
+		Double percentage = 100.0 * (currentXP - currentLevelXP) / (nextLevelXP - currentLevelXP);
+		String xpPercentageText = "(" + f.format(percentage) + "%)";
+
+		if (config.showPercentage()) xpText += " " + xpPercentageText;
 
 		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() >= adjustedY
 				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + HEIGHT;
