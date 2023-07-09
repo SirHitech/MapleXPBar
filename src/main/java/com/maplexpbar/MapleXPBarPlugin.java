@@ -186,7 +186,7 @@ class XPBarOverlay extends Overlay
 		currentLevel = Experience.getLevelForXp(currentXP);
 		nextLevelXP = Experience.getXpForLevel(currentLevel + 1);
 		int currentLevelXP = Experience.getXpForLevel(currentLevel);
-		boolean isTransparentChatbox = client.getVar(Varbits.TRANSPARENT_CHATBOX) == 1;
+		boolean isTransparentChatbox = client.getVarbitValue(Varbits.TRANSPARENT_CHATBOX) == 1;
 
 		//Calc starting position for bar
 		int adjustedX = x;
@@ -233,7 +233,7 @@ class XPBarOverlay extends Overlay
 		int currentPray = client.getBoostedSkillLevel(Skill.PRAYER);
 		int maxPray = client.getRealSkillLevel(Skill.PRAYER);
 
-		boolean isTransparentChatbox = client.getVar(Varbits.TRANSPARENT_CHATBOX) == 1;
+		boolean isTransparentChatbox = client.getVarbitValue(Varbits.TRANSPARENT_CHATBOX) == 1;
 
 		//Calc starting positions for bars
 		int adjustedX = x;
