@@ -3,7 +3,6 @@ package com.maplexpbar;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
