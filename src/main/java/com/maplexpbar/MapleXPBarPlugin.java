@@ -3,6 +3,7 @@ package com.maplexpbar;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -154,7 +155,7 @@ class XPBarOverlay extends Overlay
 		for (Viewport viewport : Viewport.values())
 		{
 			final Widget viewportWidget = client.getWidget(viewport.getViewport());
-			if (viewportWidget != null && !viewportWidget.isHidden())
+			if (viewportWidget != null)
 			{
 				curViewport = viewport;
 				curWidget = viewportWidget;
@@ -167,13 +168,16 @@ class XPBarOverlay extends Overlay
 			return null;
 		}
 
+		boolean isChatboxUnloaded = curWidget.getCanvasLocation().equals(new Point(-1, -1));
+
 		final Point offset = curViewport.getOffsetLeft();
-		final Point location = curWidget.getCanvasLocation();
+		final Point location = isChatboxUnloaded ? new Point(0, client.getCanvasHeight() - 165) : curWidget.getCanvasLocation();
 		final int height, offsetBarX, offsetBarY;
 
+		int chatboxHiddenOffset = curWidget.isHidden() ? 142 : 0;
 		height = HEIGHT;
 		offsetBarX = (location.getX() - offset.getX());
-		offsetBarY = (location.getY() - offset.getY());
+		offsetBarY = (location.getY() - offset.getY() + chatboxHiddenOffset);
 
 		if (config.displayHealthAndPrayer())
 			renderThreeBars(g, offsetBarX, offsetBarY, height);
