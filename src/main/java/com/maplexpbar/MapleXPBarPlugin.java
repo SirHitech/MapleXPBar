@@ -14,7 +14,7 @@ import net.runelite.api.Point;
 import net.runelite.api.Skill;
 import net.runelite.api.events.StatChanged;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.api.widgets.ComponentID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -345,10 +345,10 @@ class XPBarOverlay extends Overlay
 @AllArgsConstructor
 enum Viewport
 {
-	FIXED(WidgetInfo.FIXED_VIEWPORT, WidgetInfo.CHATBOX,
+	FIXED(ComponentID.FIXED_VIEWPORT_FIXED_VIEWPORT, ComponentID.CHATBOX_FRAME,
 			new Point(-4, XPBarOverlay.HEIGHT));
 
-	private WidgetInfo container;
-	private WidgetInfo viewport;
+	private int container;
+	private int viewport;
 	private Point offsetLeft;
 }
