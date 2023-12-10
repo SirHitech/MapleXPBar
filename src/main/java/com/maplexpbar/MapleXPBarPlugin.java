@@ -205,7 +205,24 @@ class XPBarOverlay extends Overlay
 			adjustedX = x - 4;
 			adjustedWidth = WIDTH + 7;
 		}
-		adjustedY = client.isResized() && isTransparentChatbox ? y + 7: y;
+
+		//Transparent chatbox looks smaller - adjust if shown
+		int[] ALL_CHATBOX_BUTTON_IDS = {10616837, 10616840, 10616844, 10616848, 10616852, 10616856, 10616860};
+		boolean isChatShown = false;
+		for (int id : ALL_CHATBOX_BUTTON_IDS)
+		{
+			int[] BUTTON_ENABLED_IDS = {3053, 3054};
+			for (int enabled_id : BUTTON_ENABLED_IDS)
+			{
+				if (client.getWidget(id).getSpriteId() == enabled_id)
+				{
+					isChatShown = true;
+					break;
+				}
+			}
+		}
+
+		adjustedY = client.isResized() && isTransparentChatbox && isChatShown ? y + 7: y;
 
 		final int filledWidth = getBarWidth(nextLevelXP - currentLevelXP, currentXP - currentLevelXP, adjustedWidth);
 
