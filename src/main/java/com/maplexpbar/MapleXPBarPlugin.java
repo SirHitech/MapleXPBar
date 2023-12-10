@@ -186,6 +186,27 @@ class XPBarOverlay extends Overlay
 		return null;
 	}
 
+	private String getTootltipText(int currentLevelXP, int nextLevelXP)
+	{
+		//Format tooltip display
+		NumberFormat f = NumberFormat.getNumberInstance(Locale.US);
+		String xpText = f.format(currentXP) + "/" + f.format(nextLevelXP);
+		Double percentage = 100.0 * (currentXP - currentLevelXP) / (nextLevelXP - currentLevelXP);
+
+		if (config.showPercentage())
+		{
+			if (config.showOnlyPercentage())
+			{
+				xpText = f.format(percentage) + "%";
+			}
+			else{
+				xpText += " (" + f.format(percentage) + "%)";
+			}
+		}
+
+		return xpText;
+	}
+
 	public void renderBar(Graphics2D graphics, int x, int y, int height)
 	{
 		//Get info for experience
@@ -226,13 +247,7 @@ class XPBarOverlay extends Overlay
 
 		final int filledWidth = getBarWidth(nextLevelXP - currentLevelXP, currentXP - currentLevelXP, adjustedWidth);
 
-		//Format tooltip display
-		NumberFormat f = NumberFormat.getNumberInstance(Locale.US);
-		String xpText = f.format(currentXP) + "/" + f.format(nextLevelXP);
-		Double percentage = 100.0 * (currentXP - currentLevelXP) / (nextLevelXP - currentLevelXP);
-		String xpPercentageText = "(" + f.format(percentage) + "%)";
-
-		if (config.showPercentage()) xpText += " " + xpPercentageText;
+		String xpText = getTootltipText(currentLevelXP, nextLevelXP);
 
 		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() >= adjustedY
 				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + HEIGHT;
@@ -275,9 +290,7 @@ class XPBarOverlay extends Overlay
 		final int filledWidthHP = getBarWidth(maxHP, currentHP, adjustedWidth);
 		final int filledWidthPray = getBarWidth(maxPray, currentPray, adjustedWidth);
 
-		//Format tooltip display
-		NumberFormat f = NumberFormat.getNumberInstance(Locale.US);
-		String xpText = f.format(currentXP) + "/" + f.format(nextLevelXP);
+		String xpText = getTootltipText(currentLevelXP, nextLevelXP);
 
 		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() >= adjustedY
 				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + HEIGHT;

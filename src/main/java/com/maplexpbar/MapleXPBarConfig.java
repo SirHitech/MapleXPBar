@@ -62,9 +62,17 @@ public interface MapleXPBarConfig extends Config
 	)
 	default boolean showPercentage() { return true; }
 
-	@Alpha
 	@ConfigItem(
 			position = 6,
+			keyName = "showOnlyPercentage",
+			name = "Only show Percentage",
+			description = "When showing percentage, hide the current XP/next level XP"
+	)
+	default boolean showOnlyPercentage() { return false; }
+
+	@Alpha
+	@ConfigItem(
+			position = 7,
 			keyName = "hpbarColor",
 			name = "HP Bar Color",
 			description = "Configures the color of the HP bar"
@@ -76,7 +84,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 7,
+			position = 8,
 			keyName = "hpbarNotchColor",
 			name = "HP Notch Color",
 			description = "Configures the color of the HP bar notches"
@@ -88,7 +96,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 8,
+			position = 9,
 			keyName = "praybarColor",
 			name = "Prayer Bar Color",
 			description = "Configures the color of the Prayer bar"
@@ -100,7 +108,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 9,
+			position = 10,
 			keyName = "praybarNotchColor",
 			name = "Prayer Notch Color",
 			description = "Configures the color of the Prayer bar notches"
@@ -112,7 +120,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 10,
+			position = 11,
 			keyName = "xpbarColor",
 			name = "XP Progress Bar Color",
 			description = "Configures the color of the XP bar"
@@ -124,7 +132,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 11,
+			position = 12,
 			keyName = "xpbarNotchColor",
 			name = "XP Notch Color",
 			description = "Configures the color of the XP bar notches"
@@ -136,7 +144,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 12,
+			position = 13,
 			keyName = "xpbarSkillColor",
 			name = "XP Progressbar as skill color",
 			description = "Configure the latest skill color as the XP bar color"
