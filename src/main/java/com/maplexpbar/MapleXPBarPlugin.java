@@ -90,13 +90,18 @@ public class MapleXPBarPlugin extends Plugin
 	@Subscribe
 	public void onStatChanged(StatChanged statChanged) {
 
+		if (statChanged.getSkill() == Skill.HITPOINTS && config.ignoreRecentHitpoints())
+		{
+			return;
+		}
+
 		Integer lastXP = skillList.put(statChanged.getSkill(), statChanged.getXp());
 
 		if (lastXP != null && lastXP != statChanged.getXp()) {
 			Integer xpThreshold = config.maxedThreshold();
 			boolean exceedsThreshold = lastXP >= xpThreshold;
 
-			if (! exceedsThreshold || (exceedsThreshold && config.showMaxedSkills()))
+			if (! exceedsThreshold || config.showMaxedSkills())
 			{
 				currentSkill = statChanged.getSkill();
 			}
