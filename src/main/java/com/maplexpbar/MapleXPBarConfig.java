@@ -26,12 +26,20 @@ public interface MapleXPBarConfig extends Config
 			position = 1,
 			keyName = "mostRecentSkill",
 			name = "Show Most Recent Skill",
-			description = "Display bar of the most recently skill with xp gain"
+			description = "Display bar of the most recent skill with xp gain"
 	)
 	default boolean mostRecentSkill() { return false; }
 
 	@ConfigItem(
 			position = 2,
+			keyName = "ignoreRecentHitpoints",
+			name = "Ignore Hitpoints as Recent",
+			description = "Ignore hitpoints if showing bar as most recent skill"
+	)
+	default boolean ignoreRecentHitpoints() { return true; }
+
+	@ConfigItem(
+			position = 3,
 			keyName = "showMaxedSkills",
 			name = "Show Maxed Skills",
 			description = "Display bar even if the skill XP exceeds threshold"
@@ -39,7 +47,7 @@ public interface MapleXPBarConfig extends Config
 	default boolean showMaxedSkills() { return false; }
 
 	@ConfigItem(
-			position = 3,
+			position = 4,
 			keyName = "maxedThreshold",
 			name = "Maxed XP Threshold",
 			description = "If Show Maxed Skills is checked, use this threshold for XP for considering a skill 'maxed'"
@@ -47,7 +55,7 @@ public interface MapleXPBarConfig extends Config
 	default int maxedThreshold() { return 13034431; }
 
 	@ConfigItem(
-			position = 4,
+			position = 5,
 			keyName = "displayHealthAndPrayer",
 			name = "Display Health And Prayer",
 			description = "Also shows a health and prayer bar"
@@ -55,7 +63,7 @@ public interface MapleXPBarConfig extends Config
 	default boolean displayHealthAndPrayer() { return false; }
 
 	@ConfigItem(
-			position = 5,
+			position = 6,
 			keyName = "showPercentage",
 			name = "Show XP Percentage",
 			description = "Also shows XP percentage when hovering over bar"
@@ -63,7 +71,7 @@ public interface MapleXPBarConfig extends Config
 	default boolean showPercentage() { return true; }
 
 	@ConfigItem(
-			position = 6,
+			position = 7,
 			keyName = "showOnlyPercentage",
 			name = "Only show Percentage",
 			description = "When showing percentage, hide the current XP/next level XP"
@@ -72,7 +80,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 7,
+			position = 8,
 			keyName = "hpbarColor",
 			name = "HP Bar Color",
 			description = "Configures the color of the HP bar"
@@ -84,7 +92,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 8,
+			position = 9,
 			keyName = "hpbarNotchColor",
 			name = "HP Notch Color",
 			description = "Configures the color of the HP bar notches"
@@ -96,7 +104,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 9,
+			position = 10,
 			keyName = "praybarColor",
 			name = "Prayer Bar Color",
 			description = "Configures the color of the Prayer bar"
@@ -108,7 +116,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 10,
+			position = 11,
 			keyName = "praybarNotchColor",
 			name = "Prayer Notch Color",
 			description = "Configures the color of the Prayer bar notches"
@@ -120,7 +128,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 11,
+			position = 12,
 			keyName = "xpbarColor",
 			name = "XP Progress Bar Color",
 			description = "Configures the color of the XP bar"
@@ -132,7 +140,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 12,
+			position = 13,
 			keyName = "xpbarNotchColor",
 			name = "XP Notch Color",
 			description = "Configures the color of the XP bar notches"
@@ -144,7 +152,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 13,
+			position = 14,
 			keyName = "xpbarSkillColor",
 			name = "XP Progressbar as skill color",
 			description = "Configure the latest skill color as the XP bar color"
