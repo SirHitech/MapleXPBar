@@ -5,4 +5,4 @@ Adds a large experience bar for a selected skill above the chatbox.
 
 Available config options
 
-![image](https://github.com/user-attachments/assets/40879d2f-3843-4df3-add3-615f39881415)
+![image](https://github.com/user-attachments/assets/003b8e7c-4d14-4441-8e60-642ee454d0a8)
