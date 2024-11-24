@@ -255,7 +255,7 @@ class XPBarOverlay extends Overlay
 		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() >= adjustedY
 				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + HEIGHT;
 
-		if (hoveringBar)
+		if (hoveringBar || config.alwaysShowTooltip())
 		{
 			int THREE_BAR_OFFSET = render3bars ? HEIGHT*2 : 0;
 			graphics.drawString(xpText, (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY-THREE_BAR_OFFSET);

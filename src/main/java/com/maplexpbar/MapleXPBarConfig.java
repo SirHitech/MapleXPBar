@@ -64,6 +64,14 @@ public interface MapleXPBarConfig extends Config
 
 	@ConfigItem(
 			position = 6,
+			keyName = "alwaysShowTooltip",
+			name = "Always Display Tooltip",
+			description = "Always display the progress tooltip"
+	)
+	default boolean alwaysShowTooltip() { return false; }
+
+	@ConfigItem(
+			position = 7,
 			keyName = "showPercentage",
 			name = "Show XP Percentage",
 			description = "Also shows XP percentage when hovering over bar"
@@ -71,7 +79,7 @@ public interface MapleXPBarConfig extends Config
 	default boolean showPercentage() { return true; }
 
 	@ConfigItem(
-			position = 7,
+			position = 8,
 			keyName = "showOnlyPercentage",
 			name = "Only show Percentage",
 			description = "When showing percentage, hide the current XP/next level XP"
@@ -80,7 +88,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 8,
+			position = 9,
 			keyName = "hpbarColor",
 			name = "HP Bar Color",
 			description = "Configures the color of the HP bar"
@@ -92,7 +100,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 9,
+			position = 10,
 			keyName = "hpbarNotchColor",
 			name = "HP Notch Color",
 			description = "Configures the color of the HP bar notches"
@@ -104,7 +112,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 10,
+			position = 11,
 			keyName = "praybarColor",
 			name = "Prayer Bar Color",
 			description = "Configures the color of the Prayer bar"
@@ -116,7 +124,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 11,
+			position = 12,
 			keyName = "praybarNotchColor",
 			name = "Prayer Notch Color",
 			description = "Configures the color of the Prayer bar notches"
@@ -128,7 +136,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 12,
+			position = 13,
 			keyName = "xpbarColor",
 			name = "XP Progress Bar Color",
 			description = "Configures the color of the XP bar"
@@ -140,7 +148,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 13,
+			position = 14,
 			keyName = "xpbarNotchColor",
 			name = "XP Notch Color",
 			description = "Configures the color of the XP bar notches"
@@ -152,7 +160,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 14,
+			position = 15,
 			keyName = "xpbarSkillColor",
 			name = "XP Progressbar as skill color",
 			description = "Configure the latest skill color as the XP bar color"
