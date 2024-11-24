@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
@@ -183,10 +184,7 @@ class XPBarOverlay extends Overlay
 		offsetBarX = (location.getX() - offset.getX());
 		offsetBarY = (location.getY() - offset.getY() + chatboxHiddenOffset);
 
-		if (config.displayHealthAndPrayer())
-			renderThreeBars(g, offsetBarX, offsetBarY, height);
-		else
-			renderBar(g, offsetBarX, offsetBarY, height);
+		renderBar(g, config.displayHealthAndPrayer(), offsetBarX, offsetBarY, height);
 
 		return null;
 	}
@@ -200,19 +198,13 @@ class XPBarOverlay extends Overlay
 
 		if (config.showPercentage())
 		{
-			if (config.showOnlyPercentage())
-			{
-				xpText = f.format(percentage) + "%";
-			}
-			else{
-				xpText += " (" + f.format(percentage) + "%)";
-			}
+			xpText = config.showOnlyPercentage() ? f.format(percentage) + "%" : xpText + " (" + f.format(percentage) + "%)";
 		}
 
 		return xpText;
 	}
 
-	public void renderBar(Graphics2D graphics, int x, int y, int height)
+	public void renderBar(Graphics2D graphics, boolean render3bars, int x, int y, int height)
 	{
 		//Get info for experience
 		Skill skill = config.mostRecentSkill() ? plugin.getCurrentSkill() : config.skill();
@@ -221,6 +213,12 @@ class XPBarOverlay extends Overlay
 		nextLevelXP = Experience.getXpForLevel(currentLevel + 1);
 		int currentLevelXP = Experience.getXpForLevel(currentLevel);
 		boolean isTransparentChatbox = client.getVarbitValue(Varbits.TRANSPARENT_CHATBOX) == 1;
+
+		//Get info for hp and pray
+		int currentHP = client.getBoostedSkillLevel(Skill.HITPOINTS);
+		int maxHP = client.getRealSkillLevel(Skill.HITPOINTS);
+		int currentPray = client.getBoostedSkillLevel(Skill.PRAYER);
+		int maxPray = client.getRealSkillLevel(Skill.PRAYER);
 
 		//Calc starting position for bar
 		int adjustedX = x;
@@ -237,59 +235,16 @@ class XPBarOverlay extends Overlay
 		boolean isChatShown = false;
 		for (int id : ALL_CHATBOX_BUTTON_IDS)
 		{
-			int[] BUTTON_ENABLED_IDS = {3053, 3054};
-			for (int enabled_id : BUTTON_ENABLED_IDS)
+			Integer[] BUTTON_ENABLED_IDS = {3053, 3054};
+
+			if (Arrays.asList(BUTTON_ENABLED_IDS).contains(client.getWidget(id).getSpriteId()))
 			{
-				if (client.getWidget(id).getSpriteId() == enabled_id)
-				{
-					isChatShown = true;
-					break;
-				}
+				isChatShown = true;
+				break;
 			}
 		}
 
 		adjustedY = client.isResized() && isTransparentChatbox && isChatShown ? y + 7: y;
-
-		final int filledWidth = getBarWidth(nextLevelXP - currentLevelXP, currentXP - currentLevelXP, adjustedWidth);
-
-		String xpText = getTootltipText(currentLevelXP, nextLevelXP);
-
-		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() >= adjustedY
-				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + HEIGHT;
-
-		if (hoveringBar) graphics.drawString(xpText, (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY);
-
-		//Render the overlay
-		Color barColor = config.mostRecentSkillColor() ? SkillColor.find(plugin.getCurrentSkill()).getColor() : config.colorXP();
-		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidth, barColor, config.colorXPNotches());
-	}
-
-	public void renderThreeBars(Graphics2D graphics, int x, int y, int height)
-	{
-		//Get info for experience, health, and prayer
-		Skill skill = config.mostRecentSkill() ? plugin.getCurrentSkill() : config.skill();
-		currentXP = client.getSkillExperience(skill);
-		currentLevel = Experience.getLevelForXp(currentXP);
-		nextLevelXP = Experience.getXpForLevel(currentLevel + 1);
-		int currentLevelXP = Experience.getXpForLevel(currentLevel);
-
-		int currentHP = client.getBoostedSkillLevel(Skill.HITPOINTS);
-		int maxHP = client.getRealSkillLevel(Skill.HITPOINTS);
-		int currentPray = client.getBoostedSkillLevel(Skill.PRAYER);
-		int maxPray = client.getRealSkillLevel(Skill.PRAYER);
-
-		boolean isTransparentChatbox = client.getVarbitValue(Varbits.TRANSPARENT_CHATBOX) == 1;
-
-		//Calc starting positions for bars
-		int adjustedX = x;
-		int adjustedY;
-		int adjustedWidth = WIDTH;
-
-		if (client.isResized()){
-			adjustedX = x - 4;
-			adjustedWidth = WIDTH + 7;
-		}
-		adjustedY = client.isResized() && isTransparentChatbox ? y + 7: y;
 
 		final int filledWidthXP = getBarWidth(nextLevelXP - currentLevelXP, currentXP - currentLevelXP, adjustedWidth);
 		final int filledWidthHP = getBarWidth(maxHP, currentHP, adjustedWidth);
@@ -300,15 +255,43 @@ class XPBarOverlay extends Overlay
 		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() >= adjustedY
 				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + HEIGHT;
 
-		if (hoveringBar) graphics.drawString(xpText, (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY-(HEIGHT*2));
+		if (hoveringBar)
+		{
+			int THREE_BAR_OFFSET = render3bars ? HEIGHT*2 : 0;
+			graphics.drawString(xpText, (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY-THREE_BAR_OFFSET);
+		}
 
-		//Render the overlays
-		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthXP, config.colorXP(), config.colorXPNotches());
-		drawBar(graphics, adjustedX, adjustedY-HEIGHT, adjustedWidth, filledWidthPray, config.colorPray(), config.colorPrayNotches());
-		drawBar(graphics, adjustedX, adjustedY-(HEIGHT*2), adjustedWidth, filledWidthHP, config.colorHP(), config.colorHPNotches());
+		Color barColor;
+
+		//Render the overlay
+		if (config.mostRecentSkillColor())
+		{
+			if (config.mostRecentSkill())
+			{
+				//As long as there is a recent skill, find it. Otherwise, stop rendering the bar
+				if (plugin.getCurrentSkill() == null) return;
+				barColor = SkillColor.find(plugin.getCurrentSkill()).getColor();
+			}
+			else
+			{
+				barColor = SkillColor.find(config.skill()).getColor();
+			}
+		}
+		else
+		{
+			barColor = config.colorXP();
+		}
+
+		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthXP, barColor, config.colorXPNotches());
+
+		if (render3bars){
+			drawBar(graphics, adjustedX, adjustedY-HEIGHT, adjustedWidth, filledWidthPray, config.colorPray(), config.colorPrayNotches());
+			drawBar(graphics, adjustedX, adjustedY-(HEIGHT*2), adjustedWidth, filledWidthHP, config.colorHP(), config.colorHPNotches());
+		}
 	}
 
-	private void drawBar(Graphics graphics, int adjustedX, int adjustedY, int adjustedWidth, int fill, Color barColor, Color notchColor){
+	private void drawBar(Graphics graphics, int adjustedX, int adjustedY, int adjustedWidth, int fill, Color barColor, Color notchColor)
+	{
 
 		graphics.setColor(BACKGROUND);
 		graphics.drawRect(adjustedX, adjustedY, adjustedWidth - BORDER_SIZE, HEIGHT - BORDER_SIZE);
@@ -321,15 +304,12 @@ class XPBarOverlay extends Overlay
 				HEIGHT - BORDER_SIZE * 2);
 
 		graphics.setColor(notchColor);
-		graphics.fillRect(adjustedX + 1 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
-		graphics.fillRect(adjustedX + 2 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
-		graphics.fillRect(adjustedX + 3 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
-		graphics.fillRect(adjustedX + 4 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
-		graphics.fillRect(adjustedX + 5 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
-		graphics.fillRect(adjustedX + 6 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
-		graphics.fillRect(adjustedX + 7 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
-		graphics.fillRect(adjustedX + 8 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
-		graphics.fillRect(adjustedX + 9 * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
+
+		//draw the 9 pip separators
+		for (int i = 1; i <= 9; i++)
+		{
+			graphics.fillRect(adjustedX + i * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
+		}
 
 	}
 
