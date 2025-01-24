@@ -22,6 +22,13 @@ public interface MapleXPBarConfig extends Config
 	)
 	String advancedSection = "advanced";
 
+	@ConfigSection(
+			name = "Bar Position and Sizing",
+			description = "Options to reposition and resize the experience bar",
+			position = 2
+	)
+	String positionSizingSection = "positionAndSizing";
+
 	@ConfigItem(
 			position = 0,
 			keyName = "skill",
@@ -208,34 +215,63 @@ public interface MapleXPBarConfig extends Config
 	)
 	default boolean mostRecentSkillColor() { return false; }
 
+	@ConfigItem(
+			position = 0,
+			keyName = "anchorToChatbox",
+			name = "Anchor to Chatbox",
+			section = positionSizingSection,
+			description = "When enabled, the offset values are in reference to top of the chatbox. When off, they are in reference to the top-left of the client"
+	)
+	default boolean anchorToChatbox() { return true; }
+
 	@Range(min=-9999, max=9999)
 	@ConfigItem(
-			position = 11,
+			position = 1,
 			keyName = "manualXOffset",
 			name = "Offset Left/Right",
-			section = advancedSection,
+			section = positionSizingSection,
 			description = "Offset the position of the XP bar horizontally. A higher number moves the UI to the right"
 	)
 	default int manualOffsetX() { return 0; }
 
 	@Range(min=-9999, max=9999)
 	@ConfigItem(
-			position = 12,
+			position = 2,
 			keyName = "manualYOffset",
 			name = "Offset Up/Down",
-			section = advancedSection,
-			description = "Offset the position of the XP bar vertically. A higher number moves the UI down"
+			section = positionSizingSection,
+			description = "Offset the position of the XP bar vertically. A higher number moves the UI up"
 	)
 	default int manualOffsetY() { return 0; }
 
-	@Range(min=1, max=1000)
+	@Range(min=3, max=50)
 	@ConfigItem(
-		position = 13,
-		keyName = "xpbarScaling",
-		name = "Size (as %)",
-		section = advancedSection,
-		description = "Resize the XP Bar"
+			position = 3,
+			keyName = "xpbarThickness",
+			name = "Bar Thickness",
+			section = positionSizingSection,
+			description = "Adjust the thickness of the XP bar"
 	)
-	default int scalingModifier() { return 100; }
+	default int thickness() { return 4; }
+
+	@Range(min=1, max=10000)
+	@ConfigItem(
+			position = 4,
+			keyName = "xpbarLength",
+			name = "Bar Length",
+			section = positionSizingSection,
+			description = "Adjust the length of the XP bar"
+	)
+	default int length() { return 512; }
+
+	@Range(min=1, max=100)
+	@ConfigItem(
+			position = 5,
+			keyName = "xpTextSize",
+			name = "Font Size",
+			section = positionSizingSection,
+			description = "Adjust the font size for the xp progress text"
+	)
+	default int fontSize() { return 16; }
 
 }
