@@ -225,6 +225,9 @@ class XPBarOverlay extends Overlay
 		int adjustedY;
 		int adjustedWidth = WIDTH;
 
+		int manualOffsetX = config.manualOffsetX();
+		int manualOffsetY = config.manualOffsetY();
+
 		if (client.isResized()){
 			adjustedX = x - 4;
 			adjustedWidth = WIDTH + 7;
@@ -246,6 +249,9 @@ class XPBarOverlay extends Overlay
 
 		adjustedY = client.isResized() && isTransparentChatbox && isChatShown ? y + 7: y;
 
+		adjustedX += manualOffsetX;
+		adjustedY += manualOffsetY;
+
 		final int filledWidthXP = getBarWidth(nextLevelXP - currentLevelXP, currentXP - currentLevelXP, adjustedWidth);
 		final int filledWidthHP = getBarWidth(maxHP, currentHP, adjustedWidth);
 		final int filledWidthPray = getBarWidth(maxPray, currentPray, adjustedWidth);
@@ -258,7 +264,7 @@ class XPBarOverlay extends Overlay
 		if (hoveringBar || config.alwaysShowTooltip())
 		{
 			int THREE_BAR_OFFSET = render3bars ? HEIGHT*2 : 0;
-			graphics.drawString(xpText, (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY-THREE_BAR_OFFSET);
+			graphics.drawString(xpText, manualOffsetX + (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY-THREE_BAR_OFFSET);
 		}
 
 		Color barColor;
