@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -120,8 +119,7 @@ class XPBarOverlay extends Overlay
 	private Client client;
 	private static final Logger logger = LoggerFactory.getLogger(XPBarOverlay.class);
 	private static final Color BACKGROUND = new Color(0, 0, 0, 255);
-	private static final int WIDTH = 512;
-	static final int HEIGHT = 4;
+	static int HEIGHT = 4;
 	private static final int BORDER_SIZE = 1;
 	private int currentXP;
 	private int currentLevel;
@@ -180,16 +178,12 @@ class XPBarOverlay extends Overlay
 		final Point location = isChatboxUnloaded ? new Point(0, client.getCanvasHeight() - 165) : curWidget.getCanvasLocation();
 		final int height, offsetBarX, offsetBarY;
 
-		boolean automaticallyOffsetBar = (
-				config.scalingModifier() == 100
-				&& config.manualOffsetX() == 0
-				&& config.manualOffsetY() == 0
-		);
+		boolean automaticallyOffsetBar = config.anchorToChatbox();
 
 		int chatboxHiddenOffset = curWidget.isHidden() && automaticallyOffsetBar ? 142 : 0;
-		height = HEIGHT;
-		offsetBarX = (location.getX() - offset.getX());
-		offsetBarY = (location.getY() - offset.getY() + chatboxHiddenOffset);
+		height = config.thickness();
+		offsetBarX = automaticallyOffsetBar ? (location.getX() - offset.getX()) : 0;
+		offsetBarY = automaticallyOffsetBar ? (location.getY() - offset.getY() + chatboxHiddenOffset) : 0;
 
 		renderBar(g, config.displayHealthAndPrayer(), offsetBarX, offsetBarY, height);
 
@@ -230,14 +224,14 @@ class XPBarOverlay extends Overlay
 		//Calc starting position for bar
 		int adjustedX = x;
 		int adjustedY;
-		int adjustedWidth = WIDTH;
+		int adjustedWidth = config.length();
 
 		int manualOffsetX = config.manualOffsetX();
-		int manualOffsetY = config.manualOffsetY();
+		int manualOffsetY = -1 * config.manualOffsetY();
 
 		if (client.isResized()){
 			adjustedX = x - 4;
-			adjustedWidth = WIDTH + 7;
+			adjustedWidth = config.length() + 7;
 		}
 
 		//Transparent chatbox looks smaller - adjust if shown
@@ -254,20 +248,12 @@ class XPBarOverlay extends Overlay
 			}
 		}
 
-		boolean automaticallyOffsetBar = (
-				config.scalingModifier() == 100
-				&& config.manualOffsetX() == 0
-				&& config.manualOffsetY() == 0
-		);
+		boolean automaticallyOffsetBar = config.anchorToChatbox();
 
 		adjustedY = client.isResized() && isTransparentChatbox && isChatShown && automaticallyOffsetBar? y + 7: y;
 
 		adjustedX += manualOffsetX;
 		adjustedY += manualOffsetY;
-
-		double scale = config.scalingModifier() / 100f;
-		AffineTransform scalingTransform = AffineTransform.getScaleInstance(scale,scale);
-		graphics.transform(scalingTransform);
 
 		final int filledWidthXP = getBarWidth(nextLevelXP - currentLevelXP, currentXP - currentLevelXP, adjustedWidth);
 		final int filledWidthHP = getBarWidth(maxHP, currentHP, adjustedWidth);
@@ -275,14 +261,15 @@ class XPBarOverlay extends Overlay
 
 		String xpText = getTootltipText(currentLevelXP, nextLevelXP);
 
-		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= (int)(adjustedX*scale) && client.getMouseCanvasPosition().getY() >= (int)(adjustedY*scale)
-				&& client.getMouseCanvasPosition().getX() <= (int)((adjustedX + adjustedWidth)*scale) && client.getMouseCanvasPosition().getY() <= (int)((adjustedY + HEIGHT)*scale);
+		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() >= adjustedY
+				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + height;
 
 		if (hoveringBar || config.alwaysShowTooltip())
 		{
-			int THREE_BAR_OFFSET = render3bars ? HEIGHT*2 : 0;
+			int THREE_BAR_OFFSET = render3bars ? height *2 : 0;
 			graphics.setColor(config.colorXPText());
-			graphics.drawString(xpText, manualOffsetX + (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY-THREE_BAR_OFFSET);
+			graphics.setFont(new Font(graphics.getFont().getFontName(), Font.PLAIN, config.fontSize()));
+			graphics.drawString(xpText, adjustedX + (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY-THREE_BAR_OFFSET);
 		}
 
 		Color barColor;
@@ -309,30 +296,31 @@ class XPBarOverlay extends Overlay
 		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthXP, barColor, config.colorXPNotches());
 
 		if (render3bars){
-			drawBar(graphics, adjustedX, adjustedY-HEIGHT, adjustedWidth, filledWidthPray, config.colorPray(), config.colorPrayNotches());
-			drawBar(graphics, adjustedX, adjustedY-(HEIGHT*2), adjustedWidth, filledWidthHP, config.colorHP(), config.colorHPNotches());
+			drawBar(graphics, adjustedX, adjustedY- height, adjustedWidth, filledWidthPray, config.colorPray(), config.colorPrayNotches());
+			drawBar(graphics, adjustedX, adjustedY-(height *2), adjustedWidth, filledWidthHP, config.colorHP(), config.colorHPNotches());
 		}
 	}
 
 	private void drawBar(Graphics2D graphics, int adjustedX, int adjustedY, int adjustedWidth, int fill, Color barColor, Color notchColor)
 	{
+		int height = config.thickness();
 
 		graphics.setColor(BACKGROUND);
-		graphics.drawRect(adjustedX, adjustedY, adjustedWidth - BORDER_SIZE, HEIGHT - BORDER_SIZE);
-		graphics.fillRect(adjustedX, adjustedY, adjustedWidth, HEIGHT);
+		graphics.drawRect(adjustedX, adjustedY, adjustedWidth - BORDER_SIZE, height - BORDER_SIZE);
+		graphics.fillRect(adjustedX, adjustedY, adjustedWidth, height);
 
 		graphics.setColor(barColor);
 		graphics.fillRect(adjustedX + BORDER_SIZE,
 				adjustedY + BORDER_SIZE,
 				fill - BORDER_SIZE * 2,
-				HEIGHT - BORDER_SIZE * 2);
+				height - BORDER_SIZE * 2);
 
 		graphics.setColor(notchColor);
 
 		//draw the 9 pip separators
 		for (int i = 1; i <= 9; i++)
 		{
-			graphics.fillRect(adjustedX + i * (adjustedWidth/10), adjustedY + 1,2, HEIGHT - BORDER_SIZE*2);
+			graphics.fillRect(adjustedX + i * (adjustedWidth/10), adjustedY + 1,2, height - BORDER_SIZE*2);
 		}
 
 	}
