@@ -188,6 +188,19 @@ public interface MapleXPBarConfig extends Config
 	@Alpha
 	@ConfigItem(
 			position = 9,
+			keyName = "xpbarTextColor",
+			name = "XP Text Color",
+			section = advancedSection,
+			description = "Configures the color of the progress text above the XP bar"
+	)
+	default Color colorXPText()
+	{
+		return Color.WHITE;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 10,
 			keyName = "xpbarSkillColor",
 			name = "XP Progressbar as skill color",
 			section = advancedSection,
@@ -197,7 +210,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Range(min=-9999, max=9999)
 	@ConfigItem(
-			position = 10,
+			position = 11,
 			keyName = "manualXOffset",
 			name = "Offset Left/Right",
 			section = advancedSection,
@@ -207,11 +220,22 @@ public interface MapleXPBarConfig extends Config
 
 	@Range(min=-9999, max=9999)
 	@ConfigItem(
-			position = 11,
+			position = 12,
 			keyName = "manualYOffset",
 			name = "Offset Up/Down",
 			section = advancedSection,
 			description = "Offset the position of the XP bar vertically. A higher number moves the UI down"
 	)
 	default int manualOffsetY() { return 0; }
+
+	@Range(min=1, max=1000)
+	@ConfigItem(
+		position = 13,
+		keyName = "xpbarScaling",
+		name = "Size (as %)",
+		section = advancedSection,
+		description = "Resize the XP Bar"
+	)
+	default int scalingModifier() { return 100; }
+
 }
