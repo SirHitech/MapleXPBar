@@ -17,7 +17,9 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
@@ -34,10 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @PluginDescriptor(
@@ -66,11 +65,15 @@ public class MapleXPBarPlugin extends Plugin
 	@Getter(AccessLevel.PACKAGE)
 	private Skill currentSkill;
 
+	@Getter(AccessLevel.PACKAGE)
+	private Font font;
+
 	private final Map<Skill, Integer> skillList = new EnumMap<>(Skill.class);
 
 	@Override
 	protected void startUp()
 	{
+		font = new Font("Runescape Small", Font.PLAIN, config.fontSize());
 		overlayManager.add(overlay);
 		barsDisplayed = true;
 	}
@@ -109,6 +112,17 @@ public class MapleXPBarPlugin extends Plugin
 		}
 
 		log.info("State CHANGED: " + statChanged.getSkill());
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if(event.getGroup().equals("MapleXP")
+				&& event.getKey().equals("xpTextSize")
+				&& event.getNewValue() != null)
+		{
+			font = font.deriveFont(Float.parseFloat(event.getNewValue()));
+		}
 	}
 }
 
@@ -268,7 +282,7 @@ class XPBarOverlay extends Overlay
 		{
 			int THREE_BAR_OFFSET = render3bars ? height *2 : 0;
 			graphics.setColor(config.colorXPText());
-			graphics.setFont(new Font(graphics.getFont().getFontName(), Font.PLAIN, config.fontSize()));
+			graphics.setFont(plugin.getFont());
 			graphics.drawString(xpText, adjustedX + (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY-THREE_BAR_OFFSET);
 		}
 
