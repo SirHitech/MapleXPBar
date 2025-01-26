@@ -17,13 +17,13 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
-import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.SkillColor;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -73,7 +73,7 @@ public class MapleXPBarPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
-		font = new Font("Runescape Small", Font.PLAIN, config.fontSize());
+		font = FontManager.getRunescapeSmallFont().deriveFont((float)config.fontSize());
 		overlayManager.add(overlay);
 		barsDisplayed = true;
 	}
