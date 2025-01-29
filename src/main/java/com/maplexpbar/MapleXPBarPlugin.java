@@ -320,7 +320,7 @@ class XPBarOverlay extends Overlay
 
 		String xpText = getTootltipText(currentXP, currentLevelXP, nextLevelXP);
 
-		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() >= adjustedY
+		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY
 				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + height;
 
 		if (hoveringBar || config.alwaysShowTooltip())
@@ -376,6 +376,21 @@ class XPBarOverlay extends Overlay
 
 			drawBar(graphics, adjustedX, adjustedY- height, adjustedWidth, filledWidthXP2, bar2Color, config.colorSkill2Notches());
 			drawBar(graphics, adjustedX, adjustedY-(height *2), adjustedWidth, filledWidthXP3, bar3Color, config.colorSkill3Notches());
+
+			String tooltip = "";
+			boolean	hoveringBar2 = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY - height
+					&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY;
+			if (hoveringBar2) { tooltip = getTootltipText(currentXP2, currentLevelXP2, nextLevelXP2); }
+			boolean	hoveringBar3 = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY - (height * 2)
+					&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY - height;
+			if (hoveringBar3) { tooltip = getTootltipText(currentXP3, currentLevelXP3, nextLevelXP3); }
+
+			// if we're always showing tooltip text for bar 1, we can't show tooltips for either of the other bars
+			if (!config.alwaysShowTooltip() && (hoveringBar2 || hoveringBar3)) {
+				graphics.setColor(config.colorXPText());
+				graphics.setFont(plugin.getFont());
+				graphics.drawString(tooltip, adjustedX + (adjustedWidth/2 + 8) - (tooltip.length()*3), adjustedY-(height *2));
+			}
 		}
 	}
 
