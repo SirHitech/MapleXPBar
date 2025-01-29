@@ -23,9 +23,23 @@ public interface MapleXPBarConfig extends Config
 	String advancedSection = "advanced";
 
 	@ConfigSection(
+			name = "Health and Prayer Mode",
+			description = "Configure the look of the bars when in Health and Prayer mode",
+			position = 2
+	)
+	String healthAndPrayerSection = "healthAndPrayerMode";
+
+	@ConfigSection(
+			name = "Multi Skill Mode",
+			description = "Configure the look of the bars when in Multi Skill mode",
+			position = 3
+	)
+	String multiSkillModeSection = "multiSkillMode";
+
+	@ConfigSection(
 			name = "Bar Position and Sizing",
 			description = "Options to reposition and resize the experience bar",
-			position = 2
+			position = 4
 	)
 	String positionSizingSection = "positionAndSizing";
 
@@ -79,15 +93,6 @@ public interface MapleXPBarConfig extends Config
 	default int maxedThreshold() { return 13034431; }
 
 	@ConfigItem(
-			position = 5,
-			keyName = "displayHealthAndPrayer",
-			name = "Display Health And Prayer",
-			section = generalSection,
-			description = "Also shows a health and prayer bar"
-	)
-	default boolean displayHealthAndPrayer() { return false; }
-
-	@ConfigItem(
 			position = 0,
 			keyName = "alwaysShowTooltip",
 			name = "Always Display Tooltip",
@@ -117,58 +122,6 @@ public interface MapleXPBarConfig extends Config
 	@Alpha
 	@ConfigItem(
 			position = 3,
-			keyName = "hpbarColor",
-			name = "HP Bar Color",
-			section = advancedSection,
-			description = "Configures the color of the HP bar"
-	)
-	default Color colorHP()
-	{
-		return Color.RED;
-	}
-
-	@Alpha
-	@ConfigItem(
-			position = 4,
-			keyName = "hpbarNotchColor",
-			name = "HP Notch Color",
-			section = advancedSection,
-			description = "Configures the color of the HP bar notches"
-	)
-	default Color colorHPNotches()
-	{
-		return Color.LIGHT_GRAY;
-	}
-
-	@Alpha
-	@ConfigItem(
-			position = 5,
-			keyName = "praybarColor",
-			name = "Prayer Bar Color",
-			section = advancedSection,
-			description = "Configures the color of the Prayer bar"
-	)
-	default Color colorPray()
-	{
-		return Color.CYAN;
-	}
-
-	@Alpha
-	@ConfigItem(
-			position = 6,
-			keyName = "praybarNotchColor",
-			name = "Prayer Notch Color",
-			section = advancedSection,
-			description = "Configures the color of the Prayer bar notches"
-	)
-	default Color colorPrayNotches()
-	{
-		return Color.DARK_GRAY;
-	}
-
-	@Alpha
-	@ConfigItem(
-			position = 7,
 			keyName = "xpbarColor",
 			name = "XP Progress Bar Color",
 			section = advancedSection,
@@ -181,7 +134,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 8,
+			position = 4,
 			keyName = "xpbarNotchColor",
 			name = "XP Notch Color",
 			section = advancedSection,
@@ -194,7 +147,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 9,
+			position = 5,
 			keyName = "xpbarTextColor",
 			name = "XP Text Color",
 			section = advancedSection,
@@ -207,13 +160,74 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 10,
+			position = 6,
 			keyName = "xpbarSkillColor",
 			name = "XP Progressbar as skill color",
 			section = advancedSection,
 			description = "Configure the latest skill color as the XP bar color"
 	)
 	default boolean mostRecentSkillColor() { return false; }
+
+	@ConfigItem(
+			position = 7,
+			keyName = "barMode",
+			name = "Bar Mode",
+			section = advancedSection,
+			description = "Single: only displays the XP bar<br>Health and Prayer: display current HP and Pray above the XP bar<br>Multi Skill: Display XP bars for up to 3 skills at once"
+	)
+	default MapleXPBarMode barMode() { return MapleXPBarMode.SINGLE; }
+
+	@Alpha
+	@ConfigItem(
+			position = 0,
+			keyName = "hpbarColor",
+			name = "HP Bar Color",
+			section = healthAndPrayerSection,
+			description = "Configures the color of the HP bar"
+	)
+	default Color colorHP()
+	{
+		return Color.RED;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 1,
+			keyName = "hpbarNotchColor",
+			name = "HP Notch Color",
+			section = healthAndPrayerSection,
+			description = "Configures the color of the HP bar notches"
+	)
+	default Color colorHPNotches()
+	{
+		return Color.LIGHT_GRAY;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 2,
+			keyName = "praybarColor",
+			name = "Prayer Bar Color",
+			section = healthAndPrayerSection,
+			description = "Configures the color of the Prayer bar"
+	)
+	default Color colorPray()
+	{
+		return Color.CYAN;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 3,
+			keyName = "praybarNotchColor",
+			name = "Prayer Notch Color",
+			section = healthAndPrayerSection,
+			description = "Configures the color of the Prayer bar notches"
+	)
+	default Color colorPrayNotches()
+	{
+		return Color.DARK_GRAY;
+	}
 
 	@ConfigItem(
 			position = 0,

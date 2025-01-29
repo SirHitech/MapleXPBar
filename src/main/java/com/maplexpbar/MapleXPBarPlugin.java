@@ -19,6 +19,7 @@ import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
@@ -51,6 +52,9 @@ public class MapleXPBarPlugin extends Plugin
 	private OverlayManager overlayManager;
 
 	@Inject
+	private ConfigManager configManager;
+
+	@Inject
 	public Client client;
 
 	@Inject
@@ -75,6 +79,7 @@ public class MapleXPBarPlugin extends Plugin
 	{
 		font = FontManager.getRunescapeSmallFont().deriveFont((float)config.fontSize());
 		overlayManager.add(overlay);
+		migrate();
 		barsDisplayed = true;
 	}
 
@@ -122,6 +127,25 @@ public class MapleXPBarPlugin extends Plugin
 				&& event.getNewValue() != null)
 		{
 			font = font.deriveFont(Float.parseFloat(event.getNewValue()));
+		}
+	}
+
+	@Subscribe
+	public void onProfileChanged(ProfileChanged profileChanged)
+	{
+		migrate();
+	}
+
+	private void migrate()
+	{
+		Boolean oldDisplayHealthAndPrayer = configManager.getConfiguration("MapleXP", "displayHealthAndPrayer", Boolean.class);
+		if (oldDisplayHealthAndPrayer != null)
+		{
+			if (oldDisplayHealthAndPrayer){
+				// convert legacy setting to new one
+				configManager.setConfiguration("MapleXP", "barMode", MapleXPBarMode.HEALTH_AND_PRAYER);
+			}
+			configManager.unsetConfiguration("MapleXP", "displayHealthAndPrayer");
 		}
 	}
 }
@@ -199,7 +223,7 @@ class XPBarOverlay extends Overlay
 		offsetBarX = automaticallyOffsetBar ? (location.getX() - offset.getX()) : 0;
 		offsetBarY = automaticallyOffsetBar ? (location.getY() - offset.getY() + chatboxHiddenOffset) : 0;
 
-		renderBar(g, config.displayHealthAndPrayer(), offsetBarX, offsetBarY, height);
+		renderBar(g, config.barMode(), offsetBarX, offsetBarY, height);
 
 		return null;
 	}
@@ -219,7 +243,7 @@ class XPBarOverlay extends Overlay
 		return xpText;
 	}
 
-	public void renderBar(Graphics2D graphics, boolean render3bars, int x, int y, int height)
+	public void renderBar(Graphics2D graphics, MapleXPBarMode mode, int x, int y, int height)
 	{
 		//Get info for experience
 		Skill skill = config.mostRecentSkill() ? plugin.getCurrentSkill() : config.skill();
@@ -280,7 +304,7 @@ class XPBarOverlay extends Overlay
 
 		if (hoveringBar || config.alwaysShowTooltip())
 		{
-			int THREE_BAR_OFFSET = render3bars ? height *2 : 0;
+			int THREE_BAR_OFFSET = !mode.equals(MapleXPBarMode.SINGLE) ? height *2 : 0;
 			graphics.setColor(config.colorXPText());
 			graphics.setFont(plugin.getFont());
 			graphics.drawString(xpText, adjustedX + (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY-THREE_BAR_OFFSET);
@@ -309,7 +333,7 @@ class XPBarOverlay extends Overlay
 
 		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthXP, barColor, config.colorXPNotches());
 
-		if (render3bars){
+		if (mode.equals(MapleXPBarMode.HEALTH_AND_PRAYER)){
 			drawBar(graphics, adjustedX, adjustedY- height, adjustedWidth, filledWidthPray, config.colorPray(), config.colorPrayNotches());
 			drawBar(graphics, adjustedX, adjustedY-(height *2), adjustedWidth, filledWidthHP, config.colorHP(), config.colorHPNotches());
 		}
