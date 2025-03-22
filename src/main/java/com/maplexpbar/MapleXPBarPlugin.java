@@ -19,6 +19,7 @@ import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.Plugin;
@@ -51,6 +52,9 @@ public class MapleXPBarPlugin extends Plugin
 	private OverlayManager overlayManager;
 
 	@Inject
+	private ConfigManager configManager;
+
+	@Inject
 	public Client client;
 
 	@Inject
@@ -75,6 +79,7 @@ public class MapleXPBarPlugin extends Plugin
 	{
 		font = FontManager.getRunescapeSmallFont().deriveFont((float)config.fontSize());
 		overlayManager.add(overlay);
+		migrate();
 		barsDisplayed = true;
 	}
 
@@ -124,6 +129,44 @@ public class MapleXPBarPlugin extends Plugin
 			font = font.deriveFont(Float.parseFloat(event.getNewValue()));
 		}
 	}
+
+	@Subscribe
+	public void onProfileChanged(ProfileChanged profileChanged)
+	{
+		migrate();
+	}
+
+	private void migrate()
+	{
+		// old HP/Pray bar config migration
+		Boolean oldDisplayHealthAndPrayer = configManager.getConfiguration("MapleXP", "displayHealthAndPrayer", Boolean.class);
+		if (oldDisplayHealthAndPrayer != null)
+		{
+			if (oldDisplayHealthAndPrayer){
+				// convert legacy setting to new one
+				configManager.setConfiguration("MapleXP", "barMode", MapleXPBarMode.HEALTH_AND_PRAYER);
+			}
+			configManager.unsetConfiguration("MapleXP", "displayHealthAndPrayer");
+		}
+
+		// old tooltip configs migration
+		Boolean oldShowPercentage = configManager.getConfiguration("MapleXP", "showPercentage", Boolean.class);
+		Boolean oldShowOnlyPercentage = configManager.getConfiguration("MapleXP", "showOnlyPercentage", Boolean.class);
+		if (oldShowPercentage != null && oldShowOnlyPercentage != null)
+		{
+			MapleXPBarTooltipMode mode;
+			if (oldShowPercentage){
+				// convert legacy setting to new one
+				configManager.setConfiguration("MapleXP", "tooltipMode", oldShowOnlyPercentage ? MapleXPBarTooltipMode.PERCENTAGE : MapleXPBarTooltipMode.BOTH);
+			}
+			else
+			{
+				configManager.setConfiguration("MapleXP", "tooltipMode", MapleXPBarTooltipMode.CURRENT_XP);
+			}
+			configManager.unsetConfiguration("MapleXP", "showPercentage");
+			configManager.unsetConfiguration("MapleXP", "showOnlyPercentage");
+		}
+	}
 }
 
 @Slf4j
@@ -135,9 +178,6 @@ class XPBarOverlay extends Overlay
 	private static final Color BACKGROUND = new Color(0, 0, 0, 255);
 	static int HEIGHT = 4;
 	private static final int BORDER_SIZE = 1;
-	private int currentXP;
-	private int currentLevel;
-	private int nextLevelXP;
 
 	private final MapleXPBarPlugin plugin;
 	private final SpriteManager spriteManager;
@@ -199,34 +239,39 @@ class XPBarOverlay extends Overlay
 		offsetBarX = automaticallyOffsetBar ? (location.getX() - offset.getX()) : 0;
 		offsetBarY = automaticallyOffsetBar ? (location.getY() - offset.getY() + chatboxHiddenOffset) : 0;
 
-		renderBar(g, config.displayHealthAndPrayer(), offsetBarX, offsetBarY, height);
+		renderBar(g, config.barMode(), offsetBarX, offsetBarY, height);
 
 		return null;
 	}
 
-	private String getTootltipText(int currentLevelXP, int nextLevelXP)
+	private String getTootltipText(int currentXP, int currentLevelXP, int nextLevelXP)
 	{
 		//Format tooltip display
 		NumberFormat f = NumberFormat.getNumberInstance(Locale.US);
 		String xpText = f.format(currentXP) + "/" + f.format(nextLevelXP);
 		Double percentage = 100.0 * (currentXP - currentLevelXP) / (nextLevelXP - currentLevelXP);
 
-		if (config.showPercentage())
-		{
-			xpText = config.showOnlyPercentage() ? f.format(percentage) + "%" : xpText + " (" + f.format(percentage) + "%)";
+		switch (config.tooltipMode()){
+			case PERCENTAGE:
+				xpText = f.format(percentage) + "%";
+				break;
+			case BOTH:
+				xpText += " (" + f.format(percentage) + "%)";
+				break;
 		}
 
 		return xpText;
 	}
 
-	public void renderBar(Graphics2D graphics, boolean render3bars, int x, int y, int height)
+	public void renderBar(Graphics2D graphics, MapleXPBarMode mode, int x, int y, int height)
 	{
 		//Get info for experience
 		Skill skill = config.mostRecentSkill() ? plugin.getCurrentSkill() : config.skill();
-		currentXP = client.getSkillExperience(skill);
-		currentLevel = Experience.getLevelForXp(currentXP);
-		nextLevelXP = Experience.getXpForLevel(currentLevel + 1);
+		int currentXP = client.getSkillExperience(skill);
+		int currentLevel = Experience.getLevelForXp(currentXP);
+		int nextLevelXP = Experience.getXpForLevel(currentLevel + 1);
 		int currentLevelXP = Experience.getXpForLevel(currentLevel);
+
 		boolean isTransparentChatbox = client.getVarbitValue(Varbits.TRANSPARENT_CHATBOX) == 1;
 
 		//Get info for hp and pray
@@ -273,14 +318,14 @@ class XPBarOverlay extends Overlay
 		final int filledWidthHP = getBarWidth(maxHP, currentHP, adjustedWidth);
 		final int filledWidthPray = getBarWidth(maxPray, currentPray, adjustedWidth);
 
-		String xpText = getTootltipText(currentLevelXP, nextLevelXP);
+		String xpText = getTootltipText(currentXP, currentLevelXP, nextLevelXP);
 
-		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() >= adjustedY
+		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY
 				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + height;
 
 		if (hoveringBar || config.alwaysShowTooltip())
 		{
-			int THREE_BAR_OFFSET = render3bars ? height *2 : 0;
+			int THREE_BAR_OFFSET = !mode.equals(MapleXPBarMode.SINGLE) ? height *2 : 0;
 			graphics.setColor(config.colorXPText());
 			graphics.setFont(plugin.getFont());
 			graphics.drawString(xpText, adjustedX + (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY-THREE_BAR_OFFSET);
@@ -289,7 +334,7 @@ class XPBarOverlay extends Overlay
 		Color barColor;
 
 		//Render the overlay
-		if (config.mostRecentSkillColor())
+		if (config.shouldAutoPickSkillColor())
 		{
 			if (config.mostRecentSkill())
 			{
@@ -309,9 +354,43 @@ class XPBarOverlay extends Overlay
 
 		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthXP, barColor, config.colorXPNotches());
 
-		if (render3bars){
+		if (mode.equals(MapleXPBarMode.HEALTH_AND_PRAYER)){
 			drawBar(graphics, adjustedX, adjustedY- height, adjustedWidth, filledWidthPray, config.colorPray(), config.colorPrayNotches());
 			drawBar(graphics, adjustedX, adjustedY-(height *2), adjustedWidth, filledWidthHP, config.colorHP(), config.colorHPNotches());
+		}
+		else if (mode.equals(MapleXPBarMode.MULTI_SKILL))
+		{
+			int currentXP2 = client.getSkillExperience(config.skill2());
+			int currentLevel2 = Experience.getLevelForXp(currentXP2);
+			int nextLevelXP2 = Experience.getXpForLevel(currentLevel2 + 1);
+			int currentLevelXP2 = Experience.getXpForLevel(currentLevel2);
+			int filledWidthXP2 = getBarWidth(nextLevelXP2 - currentLevelXP2, currentXP2 - currentLevelXP2, adjustedWidth);
+			Color bar2Color = config.shouldAutoPickSkill2Color() ? SkillColor.find(config.skill2()).getColor() : config.colorSkill2();
+
+			int currentXP3 = client.getSkillExperience(config.skill3());
+			int currentLevel3 = Experience.getLevelForXp(currentXP3);
+			int nextLevelXP3 = Experience.getXpForLevel(currentLevel3 + 1);
+			int currentLevelXP3 = Experience.getXpForLevel(currentLevel3);
+			int filledWidthXP3 = getBarWidth(nextLevelXP3 - currentLevelXP3, currentXP3 - currentLevelXP3, adjustedWidth);
+			Color bar3Color = config.shouldAutoPickSkill3Color() ? SkillColor.find(config.skill3()).getColor() : config.colorSkill3();
+
+			drawBar(graphics, adjustedX, adjustedY- height, adjustedWidth, filledWidthXP2, bar2Color, config.colorSkill2Notches());
+			drawBar(graphics, adjustedX, adjustedY-(height *2), adjustedWidth, filledWidthXP3, bar3Color, config.colorSkill3Notches());
+
+			String tooltip = "";
+			boolean	hoveringBar2 = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY - height
+					&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY;
+			if (hoveringBar2) { tooltip = getTootltipText(currentXP2, currentLevelXP2, nextLevelXP2); }
+			boolean	hoveringBar3 = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY - (height * 2)
+					&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY - height;
+			if (hoveringBar3) { tooltip = getTootltipText(currentXP3, currentLevelXP3, nextLevelXP3); }
+
+			// if we're always showing tooltip text for bar 1, we can't show tooltips for either of the other bars
+			if (!config.alwaysShowTooltip() && (hoveringBar2 || hoveringBar3)) {
+				graphics.setColor(config.colorXPText());
+				graphics.setFont(plugin.getFont());
+				graphics.drawString(tooltip, adjustedX + (adjustedWidth/2 + 8) - (tooltip.length()*3), adjustedY-(height *2));
+			}
 		}
 	}
 

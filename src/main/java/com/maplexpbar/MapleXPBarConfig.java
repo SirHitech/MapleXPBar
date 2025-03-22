@@ -23,9 +23,23 @@ public interface MapleXPBarConfig extends Config
 	String advancedSection = "advanced";
 
 	@ConfigSection(
+			name = "Health and Prayer Mode",
+			description = "Configure the look of the bars when in Health and Prayer mode",
+			position = 2
+	)
+	String healthAndPrayerSection = "healthAndPrayerMode";
+
+	@ConfigSection(
+			name = "Multi Skill Mode",
+			description = "Configure the look of the bars when in Multi Skill mode",
+			position = 3
+	)
+	String multiSkillModeSection = "multiSkillMode";
+
+	@ConfigSection(
 			name = "Bar Position and Sizing",
 			description = "Options to reposition and resize the experience bar",
-			position = 2
+			position = 4
 	)
 	String positionSizingSection = "positionAndSizing";
 
@@ -79,15 +93,6 @@ public interface MapleXPBarConfig extends Config
 	default int maxedThreshold() { return 13034431; }
 
 	@ConfigItem(
-			position = 5,
-			keyName = "displayHealthAndPrayer",
-			name = "Display Health And Prayer",
-			section = generalSection,
-			description = "Also shows a health and prayer bar"
-	)
-	default boolean displayHealthAndPrayer() { return false; }
-
-	@ConfigItem(
 			position = 0,
 			keyName = "alwaysShowTooltip",
 			name = "Always Display Tooltip",
@@ -98,77 +103,16 @@ public interface MapleXPBarConfig extends Config
 
 	@ConfigItem(
 			position = 1,
-			keyName = "showPercentage",
-			name = "Show XP Percentage",
+			keyName = "tooltipMode",
+			name = "Tooltip Text",
 			section = advancedSection,
-			description = "Also shows XP percentage when hovering over bar"
+			description = "Display the current over total XP, XP as a percent to next level, or both"
 	)
-	default boolean showPercentage() { return true; }
+	default MapleXPBarTooltipMode tooltipMode() { return MapleXPBarTooltipMode.BOTH; }
 
+	@Alpha
 	@ConfigItem(
 			position = 2,
-			keyName = "showOnlyPercentage",
-			name = "Only show Percentage",
-			section = advancedSection,
-			description = "When showing percentage, hide the current XP/next level XP"
-	)
-	default boolean showOnlyPercentage() { return false; }
-
-	@Alpha
-	@ConfigItem(
-			position = 3,
-			keyName = "hpbarColor",
-			name = "HP Bar Color",
-			section = advancedSection,
-			description = "Configures the color of the HP bar"
-	)
-	default Color colorHP()
-	{
-		return Color.RED;
-	}
-
-	@Alpha
-	@ConfigItem(
-			position = 4,
-			keyName = "hpbarNotchColor",
-			name = "HP Notch Color",
-			section = advancedSection,
-			description = "Configures the color of the HP bar notches"
-	)
-	default Color colorHPNotches()
-	{
-		return Color.LIGHT_GRAY;
-	}
-
-	@Alpha
-	@ConfigItem(
-			position = 5,
-			keyName = "praybarColor",
-			name = "Prayer Bar Color",
-			section = advancedSection,
-			description = "Configures the color of the Prayer bar"
-	)
-	default Color colorPray()
-	{
-		return Color.CYAN;
-	}
-
-	@Alpha
-	@ConfigItem(
-			position = 6,
-			keyName = "praybarNotchColor",
-			name = "Prayer Notch Color",
-			section = advancedSection,
-			description = "Configures the color of the Prayer bar notches"
-	)
-	default Color colorPrayNotches()
-	{
-		return Color.DARK_GRAY;
-	}
-
-	@Alpha
-	@ConfigItem(
-			position = 7,
 			keyName = "xpbarColor",
 			name = "XP Progress Bar Color",
 			section = advancedSection,
@@ -181,7 +125,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 8,
+			position = 3,
 			keyName = "xpbarNotchColor",
 			name = "XP Notch Color",
 			section = advancedSection,
@@ -194,7 +138,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 9,
+			position = 4,
 			keyName = "xpbarTextColor",
 			name = "XP Text Color",
 			section = advancedSection,
@@ -207,13 +151,170 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 10,
+			position = 5,
 			keyName = "xpbarSkillColor",
-			name = "XP Progressbar as skill color",
+			name = "Automatically Pick Skill Color",
 			section = advancedSection,
-			description = "Configure the latest skill color as the XP bar color"
+			description = "Use the skill's color instead of the user set color"
 	)
-	default boolean mostRecentSkillColor() { return false; }
+	default boolean shouldAutoPickSkillColor() { return false; }
+
+	@ConfigItem(
+			position = 6,
+			keyName = "barMode",
+			name = "Bar Mode",
+			section = advancedSection,
+			description = "Single: only displays the XP bar<br>Health and Prayer: display current HP and Pray above the XP bar<br>Multi Skill: Display XP bars for 3 skills at once"
+	)
+	default MapleXPBarMode barMode() { return MapleXPBarMode.SINGLE; }
+
+	@Alpha
+	@ConfigItem(
+			position = 0,
+			keyName = "hpbarColor",
+			name = "HP Bar Color",
+			section = healthAndPrayerSection,
+			description = "Configures the color of the HP bar"
+	)
+	default Color colorHP()
+	{
+		return Color.RED;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 1,
+			keyName = "hpbarNotchColor",
+			name = "HP Notch Color",
+			section = healthAndPrayerSection,
+			description = "Configures the color of the HP bar notches"
+	)
+	default Color colorHPNotches()
+	{
+		return Color.LIGHT_GRAY;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 2,
+			keyName = "praybarColor",
+			name = "Prayer Bar Color",
+			section = healthAndPrayerSection,
+			description = "Configures the color of the Prayer bar"
+	)
+	default Color colorPray()
+	{
+		return Color.CYAN;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 3,
+			keyName = "praybarNotchColor",
+			name = "Prayer Notch Color",
+			section = healthAndPrayerSection,
+			description = "Configures the color of the Prayer bar notches"
+	)
+	default Color colorPrayNotches()
+	{
+		return Color.DARK_GRAY;
+	}
+
+	@ConfigItem(
+			position = 0,
+			keyName = "skill2",
+			name = "Skill 2",
+			section = multiSkillModeSection,
+			description = "Choose which skill to show xp for on the second bar"
+	)
+	default Skill skill2()
+	{
+		return Skill.STRENGTH;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 1,
+			keyName = "xpbarSkill2Color",
+			name = "Automatically Pick Skill 2 Color",
+			section = multiSkillModeSection,
+			description = "Use the skill's color instead of the user set color"
+	)
+	default boolean shouldAutoPickSkill2Color() { return true; }
+
+	@Alpha
+	@ConfigItem(
+			position = 2,
+			keyName = "skill2barColor",
+			name = "Skill 2 Bar Color",
+			section = multiSkillModeSection,
+			description = "Configures the color of the second skill bar"
+	)
+	default Color colorSkill2()
+	{
+		return Color.ORANGE;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 3,
+			keyName = "skill2barNotchColor",
+			name = "Skill 2 Notch Color",
+			section = multiSkillModeSection,
+			description = "Configures the color of the second skill bar notches"
+	)
+	default Color colorSkill2Notches()
+	{
+		return Color.DARK_GRAY;
+	}
+
+	@ConfigItem(
+			position = 4,
+			keyName = "skill3",
+			name = "Skill 3",
+			section = multiSkillModeSection,
+			description = "Choose which skill to show xp for on the third bar"
+	)
+	default Skill skill3()
+	{
+		return Skill.DEFENCE;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 5,
+			keyName = "xpbarSkill3Color",
+			name = "Automatically Pick Skill 3 Color",
+			section = multiSkillModeSection,
+			description = "Use the skill's color instead of the user set color"
+	)
+	default boolean shouldAutoPickSkill3Color() { return true; }
+
+	@Alpha
+	@ConfigItem(
+			position = 6,
+			keyName = "skill3barColor",
+			name = "Skill 3 Bar Color",
+			section = multiSkillModeSection,
+			description = "Configures the color of the third skill bar"
+	)
+	default Color colorSkill3()
+	{
+		return Color.PINK;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 7,
+			keyName = "skill3barNotchColor",
+			name = "Skill 3 Notch Color",
+			section = multiSkillModeSection,
+			description = "Configures the color of the third skill bar notches"
+	)
+	default Color colorSkill3Notches()
+	{
+		return Color.DARK_GRAY;
+	}
 
 	@ConfigItem(
 			position = 0,
