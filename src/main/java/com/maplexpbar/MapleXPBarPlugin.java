@@ -111,7 +111,7 @@ public class MapleXPBarPlugin extends Plugin
 			}
 		}
 
-		log.info("State CHANGED: " + statChanged.getSkill());
+		log.debug("State CHANGED: " + statChanged.getSkill());
 	}
 
 	@Subscribe
