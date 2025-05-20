@@ -114,9 +114,9 @@ public interface MapleXPBarConfig extends Config
 	@ConfigItem(
 			position = 2,
 			keyName = "xpbarColor",
-			name = "XP Progress Bar Color",
+			name = "XP Progress Color",
 			section = advancedSection,
-			description = "Configures the color of the XP bar"
+			description = "Configures the progress color of the XP bar"
 	)
 	default Color colorXP()
 	{
@@ -139,6 +139,19 @@ public interface MapleXPBarConfig extends Config
 	@Alpha
 	@ConfigItem(
 			position = 4,
+			keyName = "xpbarBackgroundColor",
+			name = "XP Bar Background",
+			section = advancedSection,
+			description = "Configures the background color of the XP bar"
+	)
+	default Color colorXPBackground()
+	{
+		return Color.BLACK;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 5,
 			keyName = "xpbarTextColor",
 			name = "XP Text Color",
 			section = advancedSection,
@@ -151,7 +164,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 5,
+			position = 6,
 			keyName = "xpbarSkillColor",
 			name = "Automatically Pick Skill Color",
 			section = advancedSection,
@@ -160,7 +173,7 @@ public interface MapleXPBarConfig extends Config
 	default boolean shouldAutoPickSkillColor() { return false; }
 
 	@ConfigItem(
-			position = 6,
+			position = 7,
 			keyName = "barMode",
 			name = "Bar Mode",
 			section = advancedSection,
@@ -197,6 +210,19 @@ public interface MapleXPBarConfig extends Config
 	@Alpha
 	@ConfigItem(
 			position = 2,
+			keyName = "hpbarBackgroundColor",
+			name = "HP Bar Background",
+			section = healthAndPrayerSection,
+			description = "Configures the background color of the HP bar"
+	)
+	default Color colorHPBackground()
+	{
+		return Color.BLACK;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 3,
 			keyName = "praybarColor",
 			name = "Prayer Bar Color",
 			section = healthAndPrayerSection,
@@ -209,7 +235,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 3,
+			position = 4,
 			keyName = "praybarNotchColor",
 			name = "Prayer Notch Color",
 			section = healthAndPrayerSection,
@@ -218,6 +244,19 @@ public interface MapleXPBarConfig extends Config
 	default Color colorPrayNotches()
 	{
 		return Color.DARK_GRAY;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 5,
+			keyName = "praybarBackgroundColor",
+			name = "Prayer Bar Background",
+			section = healthAndPrayerSection,
+			description = "Configures the background color of the Prayer bar"
+	)
+	default Color colorPrayBackground()
+	{
+		return Color.BLACK;
 	}
 
 	@ConfigItem(
@@ -246,7 +285,7 @@ public interface MapleXPBarConfig extends Config
 	@ConfigItem(
 			position = 2,
 			keyName = "skill2barColor",
-			name = "Skill 2 Bar Color",
+			name = "Skill 2 Progress Color",
 			section = multiSkillModeSection,
 			description = "Configures the color of the second skill bar"
 	)
@@ -268,8 +307,21 @@ public interface MapleXPBarConfig extends Config
 		return Color.DARK_GRAY;
 	}
 
+	@Alpha
 	@ConfigItem(
 			position = 4,
+			keyName = "skill2barBackgroundColor",
+			name = "Skill 2 Background",
+			section = multiSkillModeSection,
+			description = "Configures the color of the second skill bar background"
+	)
+	default Color colorSkill2Background()
+	{
+		return Color.BLACK;
+	}
+
+	@ConfigItem(
+			position = 5,
 			keyName = "skill3",
 			name = "Skill 3",
 			section = multiSkillModeSection,
@@ -282,7 +334,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 5,
+			position = 6,
 			keyName = "xpbarSkill3Color",
 			name = "Automatically Pick Skill 3 Color",
 			section = multiSkillModeSection,
@@ -292,9 +344,9 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 6,
+			position = 7,
 			keyName = "skill3barColor",
-			name = "Skill 3 Bar Color",
+			name = "Skill 3 Progress Color",
 			section = multiSkillModeSection,
 			description = "Configures the color of the third skill bar"
 	)
@@ -305,7 +357,20 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 7,
+			position = 8,
+			keyName = "skill3barBackgroundColor",
+			name = "Skill 3 Background",
+			section = multiSkillModeSection,
+			description = "Configures the color of the third skill bar background"
+	)
+	default Color colorSkill3Background()
+	{
+		return Color.BLACK;
+	}
+
+	@Alpha
+	@ConfigItem(
+			position = 8,
 			keyName = "skill3barNotchColor",
 			name = "Skill 3 Notch Color",
 			section = multiSkillModeSection,

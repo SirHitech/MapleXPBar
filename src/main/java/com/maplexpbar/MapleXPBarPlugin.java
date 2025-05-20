@@ -175,7 +175,6 @@ class XPBarOverlay extends Overlay
 	private MapleXPBarConfig config;
 	private Client client;
 	private static final Logger logger = LoggerFactory.getLogger(XPBarOverlay.class);
-	private static final Color BACKGROUND = new Color(0, 0, 0, 255);
 	static int HEIGHT = 4;
 	private static final int BORDER_SIZE = 1;
 
@@ -352,11 +351,11 @@ class XPBarOverlay extends Overlay
 			barColor = config.colorXP();
 		}
 
-		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthXP, barColor, config.colorXPNotches());
+		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthXP, barColor, config.colorXPNotches(), config.colorXPBackground());
 
 		if (mode.equals(MapleXPBarMode.HEALTH_AND_PRAYER)){
-			drawBar(graphics, adjustedX, adjustedY- height, adjustedWidth, filledWidthPray, config.colorPray(), config.colorPrayNotches());
-			drawBar(graphics, adjustedX, adjustedY-(height *2), adjustedWidth, filledWidthHP, config.colorHP(), config.colorHPNotches());
+			drawBar(graphics, adjustedX, adjustedY- height, adjustedWidth, filledWidthPray, config.colorPray(), config.colorPrayNotches(), config.colorPrayBackground());
+			drawBar(graphics, adjustedX, adjustedY-(height *2), adjustedWidth, filledWidthHP, config.colorHP(), config.colorHPNotches(), config.colorHPBackground());
 		}
 		else if (mode.equals(MapleXPBarMode.MULTI_SKILL))
 		{
@@ -374,8 +373,8 @@ class XPBarOverlay extends Overlay
 			int filledWidthXP3 = getBarWidth(nextLevelXP3 - currentLevelXP3, currentXP3 - currentLevelXP3, adjustedWidth);
 			Color bar3Color = config.shouldAutoPickSkill3Color() ? SkillColor.find(config.skill3()).getColor() : config.colorSkill3();
 
-			drawBar(graphics, adjustedX, adjustedY- height, adjustedWidth, filledWidthXP2, bar2Color, config.colorSkill2Notches());
-			drawBar(graphics, adjustedX, adjustedY-(height *2), adjustedWidth, filledWidthXP3, bar3Color, config.colorSkill3Notches());
+			drawBar(graphics, adjustedX, adjustedY- height, adjustedWidth, filledWidthXP2, bar2Color, config.colorSkill2Notches(), config.colorSkill2Background());
+			drawBar(graphics, adjustedX, adjustedY-(height *2), adjustedWidth, filledWidthXP3, bar3Color, config.colorSkill3Notches(), config.colorSkill3Background());
 
 			String tooltip = "";
 			boolean	hoveringBar2 = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY - height
@@ -394,11 +393,11 @@ class XPBarOverlay extends Overlay
 		}
 	}
 
-	private void drawBar(Graphics2D graphics, int adjustedX, int adjustedY, int adjustedWidth, int fill, Color barColor, Color notchColor)
+	private void drawBar(Graphics2D graphics, int adjustedX, int adjustedY, int adjustedWidth, int fill, Color barColor, Color notchColor, Color backgroundColor)
 	{
 		int height = config.thickness();
 
-		graphics.setColor(BACKGROUND);
+		graphics.setColor(backgroundColor);
 		graphics.drawRect(adjustedX, adjustedY, adjustedWidth - BORDER_SIZE, height - BORDER_SIZE);
 		graphics.fillRect(adjustedX, adjustedY, adjustedWidth, height);
 
