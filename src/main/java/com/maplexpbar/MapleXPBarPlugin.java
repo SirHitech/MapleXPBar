@@ -166,6 +166,14 @@ public class MapleXPBarPlugin extends Plugin
 			configManager.unsetConfiguration("MapleXP", "showPercentage");
 			configManager.unsetConfiguration("MapleXP", "showOnlyPercentage");
 		}
+
+		// old anchor to chatbox migration
+		Boolean oldAnchorToChatbox = configManager.getConfiguration("MapleXP", "anchorToChatbox", Boolean.class);
+		if (oldAnchorToChatbox != null){
+			// convert legacy setting to new one
+			configManager.setConfiguration("MapleXP", "anchorPoint", oldAnchorToChatbox ? MapleXPBarAnchorMode.CHATBOX : MapleXPBarAnchorMode.TOP_LEFT);
+		}
+		configManager.unsetConfiguration("MapleXP", "anchorToChatbox");
 	}
 }
 
@@ -231,7 +239,7 @@ class XPBarOverlay extends Overlay
 		final Point location = isChatboxUnloaded ? new Point(0, client.getCanvasHeight() - 165) : curWidget.getCanvasLocation();
 		final int height, offsetBarX, offsetBarY;
 
-		boolean automaticallyOffsetBar = config.anchorToChatbox();
+		boolean automaticallyOffsetBar = config.anchorPoint() == MapleXPBarAnchorMode.CHATBOX;
 
 		int chatboxHiddenOffset = curWidget.isHidden() && automaticallyOffsetBar ? 142 : 0;
 		height = config.thickness();
@@ -306,7 +314,7 @@ class XPBarOverlay extends Overlay
 			}
 		}
 
-		boolean automaticallyOffsetBar = config.anchorToChatbox();
+		boolean automaticallyOffsetBar = config.anchorPoint() == MapleXPBarAnchorMode.CHATBOX;
 
 		adjustedY = client.isResized() && isTransparentChatbox && isChatShown && automaticallyOffsetBar? y + 7: y;
 

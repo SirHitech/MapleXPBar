@@ -383,12 +383,12 @@ public interface MapleXPBarConfig extends Config
 
 	@ConfigItem(
 			position = 0,
-			keyName = "anchorToChatbox",
-			name = "Anchor to Chatbox",
+			keyName = "anchorPoint",
+			name = "Anchor Point",
 			section = positionSizingSection,
-			description = "When enabled, the offset values are in reference to top of the chatbox. When off, they are in reference to the top-left of the client"
+			description = "what UI piece the offset values are in reference to. Minimap and Inventory are only available in Resizable layouts"
 	)
-	default boolean anchorToChatbox() { return true; }
+	default MapleXPBarAnchorMode anchorPoint() { return MapleXPBarAnchorMode.CHATBOX; }
 
 	@Range(min=-9999, max=9999)
 	@ConfigItem(
