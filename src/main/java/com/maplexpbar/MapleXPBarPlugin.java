@@ -13,6 +13,7 @@ import net.runelite.api.Varbits;
 import net.runelite.api.Point;
 import net.runelite.api.Skill;
 import net.runelite.api.events.StatChanged;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.client.callback.ClientThread;
@@ -214,37 +215,46 @@ class XPBarOverlay extends Overlay
 			return null;
 		}
 
-		Viewport curViewport = null;
-		Widget curWidget = null;
+		Point offset = null;
+		Point chatboxAnchorLocation = null;
 
+		// Determine where to draw the bar, using the anchor point config selected
 		for (Viewport viewport : Viewport.values())
 		{
 			final Widget viewportWidget = client.getWidget(viewport.getViewport());
-			if (viewportWidget != null)
+			if (viewportWidget != null && !viewportWidget.isHidden() && viewport.getType().equals(config.anchorPoint().getMenuName()))
 			{
-				curViewport = viewport;
-				curWidget = viewportWidget;
+				offset = viewport.getOffsetLeft();
+				chatboxAnchorLocation = viewportWidget.getCanvasLocation();
 				break;
 			}
 		}
 
-		if (curViewport == null)
+		if (chatboxAnchorLocation == null)
 		{
-			return null;
+			// Chatbox or inventory might be hidden - check if a fallback is visible, and use those if applicable
+			for (FallbackViewport viewport : FallbackViewport.values())
+			{
+				final Widget viewportWidget = client.getWidget(viewport.getViewport());
+				if (viewportWidget != null && !viewportWidget.isHidden() && viewport.getType().equals(config.anchorPoint().getMenuName()))
+				{
+					offset = viewport.getOffsetLeft();
+					chatboxAnchorLocation = viewportWidget.getCanvasLocation();
+					break;
+				}
+			}
+
+			if (chatboxAnchorLocation == null){
+				// backup component not found, don't render the bar
+				return null;
+			}
 		}
 
-		boolean isChatboxUnloaded = curWidget.getCanvasLocation().equals(new Point(-1, -1));
-
-		final Point offset = curViewport.getOffsetLeft();
-		final Point location = isChatboxUnloaded ? new Point(0, client.getCanvasHeight() - 165) : curWidget.getCanvasLocation();
 		final int height, offsetBarX, offsetBarY;
 
-		boolean automaticallyOffsetBar = config.anchorPoint() == MapleXPBarAnchorMode.CHATBOX;
-
-		int chatboxHiddenOffset = curWidget.isHidden() && automaticallyOffsetBar ? 142 : 0;
 		height = config.thickness();
-		offsetBarX = automaticallyOffsetBar ? (location.getX() - offset.getX()) : 0;
-		offsetBarY = automaticallyOffsetBar ? (location.getY() - offset.getY() + chatboxHiddenOffset) : 0;
+		offsetBarX = chatboxAnchorLocation.getX() - offset.getX();
+		offsetBarY = chatboxAnchorLocation.getY() - offset.getY();
 
 		renderBar(g, config.barMode(), offsetBarX, offsetBarY, height);
 
@@ -442,10 +452,46 @@ class XPBarOverlay extends Overlay
 @AllArgsConstructor
 enum Viewport
 {
-	FIXED(ComponentID.FIXED_VIEWPORT_FIXED_VIEWPORT, ComponentID.CHATBOX_FRAME,
+	CHATBOX("Chatbox", ComponentID.CHATBOX_FRAME,
+			new Point(-4, XPBarOverlay.HEIGHT)),
+
+	TOP_LEFT_FIXED("Top Left", InterfaceID.Toplevel.VIEWPORT,
+			new Point(0, XPBarOverlay.HEIGHT - 16)),
+
+	TOP_LEFT_PRE_EOC("Top Left", InterfaceID.ToplevelPreEoc.VIEWPORT,
+			new Point(0, XPBarOverlay.HEIGHT - 16)),
+
+	TOP_LEFT_STRETCH("Top Left", InterfaceID.ToplevelOsrsStretch.VIEWPORT,
+			new Point(4, XPBarOverlay.HEIGHT - 16)),
+
+	MINIMAP("Minimap", ComponentID.MINIMAP_CONTAINER,
+			new Point(-4, -171)),
+
+	INVENTORY_FIXED("Inventory", InterfaceID.Toplevel.SIDE_TOP_CONTAINER,
+			new Point(0, XPBarOverlay.HEIGHT)),
+
+	INVENTORY_PRE_EOC("Inventory", InterfaceID.ToplevelPreEoc.SIDE_CONTAINER,
+			new Point(-4, XPBarOverlay.HEIGHT)),
+
+	INVENTORY_STRETCH("Inventory", InterfaceID.ToplevelOsrsStretch.SIDE_CONTAINER,
+			new Point(21, XPBarOverlay.HEIGHT + 37));
+
+	private String type;
+	private int viewport;
+	private Point offsetLeft;
+}
+
+@Getter
+@AllArgsConstructor
+enum FallbackViewport
+{
+	CHATBOX_FALLBACK("Chatbox", InterfaceID.Chatbox.CONTROLS,
+			new Point(-4, XPBarOverlay.HEIGHT)),
+
+	INVENTORY_FALLBACK("Inventory", InterfaceID.ToplevelPreEoc.SIDE_MOVABLE_LAYER,
 			new Point(-4, XPBarOverlay.HEIGHT));
 
-	private int container;
+	private String type;
 	private int viewport;
 	private Point offsetLeft;
 }
