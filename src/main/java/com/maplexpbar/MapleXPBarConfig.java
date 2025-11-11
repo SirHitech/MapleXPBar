@@ -386,7 +386,7 @@ public interface MapleXPBarConfig extends Config
 			keyName = "anchorPoint",
 			name = "Anchor Point",
 			section = positionSizingSection,
-			description = "what UI piece the offset values are in reference to. Minimap and Inventory are only available in Resizable layouts"
+			description = "Which UI piece the offset values are in reference to"
 	)
 	default MapleXPBarAnchorMode anchorPoint() { return MapleXPBarAnchorMode.CHATBOX; }
 
