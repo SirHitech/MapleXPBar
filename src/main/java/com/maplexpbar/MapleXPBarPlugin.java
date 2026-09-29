@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -188,6 +189,7 @@ class XPBarOverlay extends Overlay
 	private static final int BORDER_SIZE = 1;
 
 	private final MapleXPBarPlugin plugin;
+	private final SkillIconManager skillIconManager;
 	private final SpriteManager spriteManager;
 
 	@Inject
@@ -198,6 +200,7 @@ class XPBarOverlay extends Overlay
 		this.client = client;
 		this.plugin = plugin;
 		this.config = config;
+		this.skillIconManager = skillIconManager;
 		this.spriteManager = spriteManager;
 	}
 
@@ -305,6 +308,11 @@ class XPBarOverlay extends Overlay
 		int manualOffsetX = config.manualOffsetX();
 		int manualOffsetY = -1 * config.manualOffsetY();
 
+		int tooltipOffsetX = config.tooltipOffsetX();
+		int tooltipOffsetY = -1 * config.tooltipOffsetY();
+
+		boolean shouldDisplaySkillIcon = config.shouldDisplaySkillIcon();
+
 		if (client.isResized()){
 			adjustedX = x - 4;
 			adjustedWidth = config.length() + 7;
@@ -334,19 +342,6 @@ class XPBarOverlay extends Overlay
 		final int filledWidthXP = getBarWidth(nextLevelXP - currentLevelXP, currentXP - currentLevelXP, adjustedWidth);
 		final int filledWidthHP = getBarWidth(maxHP, currentHP, adjustedWidth);
 		final int filledWidthPray = getBarWidth(maxPray, currentPray, adjustedWidth);
-
-		String xpText = getTootltipText(currentXP, currentLevelXP, nextLevelXP);
-
-		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY
-				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + height;
-
-		if (hoveringBar || config.alwaysShowTooltip())
-		{
-			int THREE_BAR_OFFSET = !mode.equals(MapleXPBarMode.SINGLE) ? height *2 : 0;
-			graphics.setColor(config.colorXPText());
-			graphics.setFont(plugin.getFont());
-			graphics.drawString(xpText, adjustedX + (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY-THREE_BAR_OFFSET);
-		}
 
 		Color barColor;
 
@@ -395,19 +390,54 @@ class XPBarOverlay extends Overlay
 			drawBar(graphics, adjustedX, adjustedY-(height *2), adjustedWidth, filledWidthXP3, bar3Color, config.colorSkill3Notches(), config.colorSkill3Background());
 
 			String tooltip = "";
+			BufferedImage img = shouldDisplaySkillIcon ? skillIconManager.getSkillImage(skill, true) : null;
 			boolean	hoveringBar2 = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY - height
 					&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY;
-			if (hoveringBar2) { tooltip = getTootltipText(currentXP2, currentLevelXP2, nextLevelXP2); }
+			if (hoveringBar2) {
+				tooltip = getTootltipText(currentXP2, currentLevelXP2, nextLevelXP2);
+				img = shouldDisplaySkillIcon ? skillIconManager.getSkillImage(config.skill2(), true) : null;
+			}
 			boolean	hoveringBar3 = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY - (height * 2)
 					&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY - height;
-			if (hoveringBar3) { tooltip = getTootltipText(currentXP3, currentLevelXP3, nextLevelXP3); }
+			if (hoveringBar3) {
+				tooltip = getTootltipText(currentXP3, currentLevelXP3, nextLevelXP3);
+				img = shouldDisplaySkillIcon ? skillIconManager.getSkillImage(config.skill3(), true) : null;
+			}
 
 			// if we're always showing tooltip text for bar 1, we can't show tooltips for either of the other bars
 			if (!config.alwaysShowTooltip() && (hoveringBar2 || hoveringBar3)) {
-				graphics.setColor(config.colorXPText());
-				graphics.setFont(plugin.getFont());
-				graphics.drawString(tooltip, adjustedX + (adjustedWidth/2 + 8) - (tooltip.length()*3), adjustedY-(height *2));
+				drawTooltip(graphics, tooltip, adjustedX, adjustedY, tooltipOffsetX, tooltipOffsetY, adjustedWidth, height, !mode.equals(MapleXPBarMode.SINGLE), img);
 			}
+		}
+
+		String xpText = getTootltipText(currentXP, currentLevelXP, nextLevelXP);
+
+		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY
+				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + height;
+
+		if (hoveringBar || config.alwaysShowTooltip()) {
+			BufferedImage img = shouldDisplaySkillIcon ? skillIconManager.getSkillImage(skill, true) : null;
+			drawTooltip(graphics, xpText, adjustedX, adjustedY, tooltipOffsetX, tooltipOffsetY, adjustedWidth, height, !mode.equals(MapleXPBarMode.SINGLE), img);
+		}
+	}
+
+	private void drawTooltip(Graphics2D graphics, String tooltipText, int x, int y, int offsetX, int offsetY, int adjustedWidth, int height, boolean isThreeBarMode, BufferedImage skillImage)
+	{
+		int threeBarOffset = isThreeBarMode ? height * 2 : 0;
+
+		int tooltipX = x + (adjustedWidth/2 + 8) - (tooltipText.length()*3) + offsetX;
+		int tooltipY = y - threeBarOffset + offsetY;
+
+		graphics.setColor(config.colorXPText());
+		graphics.setFont(plugin.getFont());
+		graphics.drawString(tooltipText, tooltipX, tooltipY);
+
+		if (skillImage != null)
+		{
+			int iconOffsetX = (-1 * skillImage.getWidth()) + config.iconOffsetX();
+			int iconOffsetY = (-1 * skillImage.getHeight()) + config.iconOffsetY();
+
+			graphics.drawImage(skillImage, tooltipX + iconOffsetX, tooltipY + iconOffsetY, null);
 		}
 	}
 

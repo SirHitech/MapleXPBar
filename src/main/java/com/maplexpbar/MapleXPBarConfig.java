@@ -162,7 +162,6 @@ public interface MapleXPBarConfig extends Config
 		return Color.WHITE;
 	}
 
-	@Alpha
 	@ConfigItem(
 			position = 6,
 			keyName = "xpbarSkillColor",
@@ -174,6 +173,15 @@ public interface MapleXPBarConfig extends Config
 
 	@ConfigItem(
 			position = 7,
+			keyName = "shouldDisplaySkillIcon",
+			name = "Display Skill Icon",
+			section = advancedSection,
+			description = "Display the current skill's icon"
+	)
+	default boolean shouldDisplaySkillIcon() { return false; }
+
+	@ConfigItem(
+			position = 8,
 			keyName = "barMode",
 			name = "Bar Mode",
 			section = advancedSection,
@@ -394,7 +402,7 @@ public interface MapleXPBarConfig extends Config
 	@ConfigItem(
 			position = 1,
 			keyName = "manualXOffset",
-			name = "Offset Left/Right",
+			name = "Bar Offset Left/Right",
 			section = positionSizingSection,
 			description = "Offset the position of the XP bar horizontally. A higher number moves the UI to the right"
 	)
@@ -404,15 +412,55 @@ public interface MapleXPBarConfig extends Config
 	@ConfigItem(
 			position = 2,
 			keyName = "manualYOffset",
-			name = "Offset Up/Down",
+			name = "Bar Offset Up/Down",
 			section = positionSizingSection,
 			description = "Offset the position of the XP bar vertically. A higher number moves the UI up"
 	)
 	default int manualOffsetY() { return 0; }
 
-	@Range(min=3, max=50)
+	@Range(min=-9999, max=9999)
 	@ConfigItem(
 			position = 3,
+			keyName = "tooltipXOffset",
+			name = "Tooltip Offset Left/Right",
+			section = positionSizingSection,
+			description = "Offset the position of the % tooltip horizontally. A higher number moves the UI to the right"
+	)
+	default int tooltipOffsetX() { return 0; }
+
+	@Range(min=-9999, max=9999)
+	@ConfigItem(
+			position = 4,
+			keyName = "tooltipYOffset",
+			name = "Tooltip Offset Up/Down",
+			section = positionSizingSection,
+			description = "Offset the position of the % tooltip vertically. A higher number moves the UI up"
+	)
+	default int tooltipOffsetY() { return 0; }
+
+	@Range(min=-9999, max=9999)
+	@ConfigItem(
+			position = 5,
+			keyName = "iconXOffset",
+			name = "Icon Offset Left/Right",
+			section = positionSizingSection,
+			description = "Offset the position of the skill icon horizontally. A higher number moves the UI to the right"
+	)
+	default int iconOffsetX() { return -1; }
+
+	@Range(min=-9999, max=9999)
+	@ConfigItem(
+			position = 6,
+			keyName = "iconYOffset",
+			name = "Icon Offset Up/Down",
+			section = positionSizingSection,
+			description = "Offset the position of the skill icon vertically. A higher number moves the UI up"
+	)
+	default int iconOffsetY() { return 0; }
+
+	@Range(min=3, max=50)
+	@ConfigItem(
+			position = 7,
 			keyName = "xpbarThickness",
 			name = "Bar Thickness",
 			section = positionSizingSection,
@@ -422,7 +470,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Range(min=1, max=10000)
 	@ConfigItem(
-			position = 4,
+			position = 8,
 			keyName = "xpbarLength",
 			name = "Bar Length",
 			section = positionSizingSection,
@@ -432,7 +480,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Range(min=1, max=100)
 	@ConfigItem(
-			position = 5,
+			position = 9,
 			keyName = "xpTextSize",
 			name = "Font Size",
 			section = positionSizingSection,
