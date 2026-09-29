@@ -406,9 +406,7 @@ class XPBarOverlay extends Overlay
 
 			// if we're always showing tooltip text for bar 1, we can't show tooltips for either of the other bars
 			if (!config.alwaysShowTooltip() && (hoveringBar2 || hoveringBar3)) {
-
 				drawTooltip(graphics, tooltip, adjustedX, adjustedY, tooltipOffsetX, tooltipOffsetY, adjustedWidth, height, !mode.equals(MapleXPBarMode.SINGLE), img);
-				//graphics.drawString(tooltip, adjustedX + (adjustedWidth/2 + 8) - (tooltip.length()*3) + tooltipOffsetX, adjustedY-(height *2) + tooltipOffsetY);
 			}
 		}
 
