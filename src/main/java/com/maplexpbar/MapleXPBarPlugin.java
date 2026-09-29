@@ -305,6 +305,9 @@ class XPBarOverlay extends Overlay
 		int manualOffsetX = config.manualOffsetX();
 		int manualOffsetY = -1 * config.manualOffsetY();
 
+		int tooltipOffsetX = config.tooltipOffsetX();
+		int tooltipOffsetY = -1 * config.tooltipOffsetY();
+
 		if (client.isResized()){
 			adjustedX = x - 4;
 			adjustedWidth = config.length() + 7;
@@ -334,19 +337,6 @@ class XPBarOverlay extends Overlay
 		final int filledWidthXP = getBarWidth(nextLevelXP - currentLevelXP, currentXP - currentLevelXP, adjustedWidth);
 		final int filledWidthHP = getBarWidth(maxHP, currentHP, adjustedWidth);
 		final int filledWidthPray = getBarWidth(maxPray, currentPray, adjustedWidth);
-
-		String xpText = getTootltipText(currentXP, currentLevelXP, nextLevelXP);
-
-		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY
-				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + height;
-
-		if (hoveringBar || config.alwaysShowTooltip())
-		{
-			int THREE_BAR_OFFSET = !mode.equals(MapleXPBarMode.SINGLE) ? height *2 : 0;
-			graphics.setColor(config.colorXPText());
-			graphics.setFont(plugin.getFont());
-			graphics.drawString(xpText, adjustedX + (adjustedWidth/2 + 8) - (xpText.length()*3), adjustedY-THREE_BAR_OFFSET);
-		}
 
 		Color barColor;
 
@@ -406,8 +396,21 @@ class XPBarOverlay extends Overlay
 			if (!config.alwaysShowTooltip() && (hoveringBar2 || hoveringBar3)) {
 				graphics.setColor(config.colorXPText());
 				graphics.setFont(plugin.getFont());
-				graphics.drawString(tooltip, adjustedX + (adjustedWidth/2 + 8) - (tooltip.length()*3), adjustedY-(height *2));
+				graphics.drawString(tooltip, adjustedX + (adjustedWidth/2 + 8) - (tooltip.length()*3) + tooltipOffsetX, adjustedY-(height *2) + tooltipOffsetY);
 			}
+		}
+
+		String xpText = getTootltipText(currentXP, currentLevelXP, nextLevelXP);
+
+		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY
+				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + height;
+
+		if (hoveringBar || config.alwaysShowTooltip())
+		{
+			int THREE_BAR_OFFSET = !mode.equals(MapleXPBarMode.SINGLE) ? height *2 : 0;
+			graphics.setColor(config.colorXPText());
+			graphics.setFont(plugin.getFont());
+			graphics.drawString(xpText, adjustedX + (adjustedWidth/2 + 8) - (xpText.length()*3) + tooltipOffsetX, adjustedY-THREE_BAR_OFFSET + tooltipOffsetY);
 		}
 	}
 

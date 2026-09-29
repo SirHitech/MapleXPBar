@@ -101,8 +101,28 @@ public interface MapleXPBarConfig extends Config
 	)
 	default boolean alwaysShowTooltip() { return false; }
 
+	@Range(min=-9999, max=9999)
 	@ConfigItem(
 			position = 1,
+			keyName = "tooltipXOffset",
+			name = "Tooltip Offset Left/Right",
+			section = advancedSection,
+			description = "Offset the position of the % tooltip horizontally. A higher number moves the UI to the right"
+	)
+	default int tooltipOffsetX() { return 0; }
+
+	@Range(min=-9999, max=9999)
+	@ConfigItem(
+			position = 2,
+			keyName = "tooltipYOffset",
+			name = "Tooltip Offset Up/Down",
+			section = advancedSection,
+			description = "Offset the position of the % tooltip vertically. A higher number moves the UI up"
+	)
+	default int tooltipOffsetY() { return 0; }
+
+	@ConfigItem(
+			position = 3,
 			keyName = "tooltipMode",
 			name = "Tooltip Text",
 			section = advancedSection,
@@ -112,7 +132,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 2,
+			position = 4,
 			keyName = "xpbarColor",
 			name = "XP Progress Color",
 			section = advancedSection,
@@ -125,7 +145,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 3,
+			position = 5,
 			keyName = "xpbarNotchColor",
 			name = "XP Notch Color",
 			section = advancedSection,
@@ -138,7 +158,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 4,
+			position = 6,
 			keyName = "xpbarBackgroundColor",
 			name = "XP Bar Background",
 			section = advancedSection,
@@ -151,7 +171,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 5,
+			position = 7,
 			keyName = "xpbarTextColor",
 			name = "XP Text Color",
 			section = advancedSection,
@@ -164,7 +184,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-			position = 6,
+			position = 8,
 			keyName = "xpbarSkillColor",
 			name = "Automatically Pick Skill Color",
 			section = advancedSection,
@@ -173,7 +193,7 @@ public interface MapleXPBarConfig extends Config
 	default boolean shouldAutoPickSkillColor() { return false; }
 
 	@ConfigItem(
-			position = 7,
+			position = 9,
 			keyName = "barMode",
 			name = "Bar Mode",
 			section = advancedSection,
