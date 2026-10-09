@@ -418,9 +418,20 @@ public interface MapleXPBarConfig extends Config
 	)
 	default int manualOffsetY() { return 0; }
 
-	@Range(min=-9999, max=9999)
 	@ConfigItem(
 			position = 3,
+			keyName = "tooltipAlignment",
+			name = "Tooltip Alignment",
+			section = positionSizingSection,
+			description = "How the tooltip text is aligned." +
+					"<br>Example: if you have displaced your tooltip to be snug against the right side of the screen," +
+					"<br>you probably want to right-align this setting."
+	)
+	default MapleXPBarAlignmentMode tooltipAlignment() { return MapleXPBarAlignmentMode.CENTER; }
+
+	@Range(min=-9999, max=9999)
+	@ConfigItem(
+			position = 4,
 			keyName = "tooltipXOffset",
 			name = "Tooltip Offset Left/Right",
 			section = positionSizingSection,
@@ -430,7 +441,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Range(min=-9999, max=9999)
 	@ConfigItem(
-			position = 4,
+			position = 5,
 			keyName = "tooltipYOffset",
 			name = "Tooltip Offset Up/Down",
 			section = positionSizingSection,
@@ -440,7 +451,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Range(min=-9999, max=9999)
 	@ConfigItem(
-			position = 5,
+			position = 6,
 			keyName = "iconXOffset",
 			name = "Icon Offset Left/Right",
 			section = positionSizingSection,
@@ -450,7 +461,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Range(min=-9999, max=9999)
 	@ConfigItem(
-			position = 6,
+			position = 7,
 			keyName = "iconYOffset",
 			name = "Icon Offset Up/Down",
 			section = positionSizingSection,
@@ -460,7 +471,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Range(min=3, max=50)
 	@ConfigItem(
-			position = 7,
+			position = 8,
 			keyName = "xpbarThickness",
 			name = "Bar Thickness",
 			section = positionSizingSection,
@@ -470,7 +481,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Range(min=1, max=10000)
 	@ConfigItem(
-			position = 8,
+			position = 9,
 			keyName = "xpbarLength",
 			name = "Bar Length",
 			section = positionSizingSection,
@@ -480,7 +491,7 @@ public interface MapleXPBarConfig extends Config
 
 	@Range(min=1, max=100)
 	@ConfigItem(
-			position = 9,
+			position = 10,
 			keyName = "xpTextSize",
 			name = "Font Size",
 			section = positionSizingSection,

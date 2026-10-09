@@ -467,16 +467,27 @@ class XPBarOverlay extends Overlay
 	 */
 	private void drawTooltip(Graphics2D graphics, String tooltipText, int x, int y, int offsetX, int offsetY, int barWidth, int barHeight, boolean isThreeBarMode, BufferedImage skillImage)
 	{
-		FontMetrics metrics = graphics.getFontMetrics(FontManager.getRunescapeSmallFont());
+		graphics.setFont(plugin.getFont());
+		FontMetrics metrics = graphics.getFontMetrics(graphics.getFont());
+
+		int tooltipX;
+		switch (config.tooltipAlignment()){
+			case LEFT:
+				tooltipX = x + (barWidth/2 + 8) + offsetX;
+				break;
+			case RIGHT:
+				tooltipX = x + (barWidth/2 + 8) - metrics.stringWidth(tooltipText) + offsetX;
+				break;
+			case CENTER:
+			default:
+				tooltipX = x + (barWidth/2 + 8) - (metrics.stringWidth(tooltipText) / 2) + offsetX;
+				break;
+		}
 
 		int threeBarOffset = isThreeBarMode ? barHeight * 2 : 0;
-
-		// (stringWidth / 2) keeps the tooltip text middle-aligned
-		int tooltipX = x + (barWidth/2 + 8) - (metrics.stringWidth(tooltipText) / 2) + offsetX;
 		int tooltipY = y - threeBarOffset + offsetY;
 
 		graphics.setColor(config.colorXPText());
-		graphics.setFont(plugin.getFont());
 		graphics.drawString(tooltipText, tooltipX, tooltipY);
 
 		if (skillImage != null)
