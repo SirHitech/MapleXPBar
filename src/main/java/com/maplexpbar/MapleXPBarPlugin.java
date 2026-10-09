@@ -528,7 +528,7 @@ class XPBarOverlay extends Overlay
 	 * @param base			The XP from the previous level to the next level
 	 * @param current		The current (not total) XP in the skill level
 	 * @param fullWidth		The full width of the bar
-	 * @return
+	 * @return				The calculated length of the bar fill
 	 */
 	private static int getBarFillLength(int base, int current, int fullWidth)
 	{
