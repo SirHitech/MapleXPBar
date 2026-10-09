@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -395,11 +396,11 @@ class XPBarOverlay extends Overlay
 		}
 
 		// Most configuration handling is done, start drawing the bar(s)
-		drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthXP, barColor, config.colorXPNotches(), config.colorXPBackground());
+		Shape bar = drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthXP, barColor, config.colorXPNotches(), config.colorXPBackground(), 0);
 
 		if (mode.equals(MapleXPBarMode.HEALTH_AND_PRAYER)){
-			drawBar(graphics, adjustedX, adjustedY - height, adjustedWidth, filledWidthPray, config.colorPray(), config.colorPrayNotches(), config.colorPrayBackground());
-			drawBar(graphics, adjustedX, adjustedY - (height * 2), adjustedWidth, filledWidthHP, config.colorHP(), config.colorHPNotches(), config.colorHPBackground());
+			drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthPray, config.colorPray(), config.colorPrayNotches(), config.colorPrayBackground(), 1);
+			drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthHP, config.colorHP(), config.colorHPNotches(), config.colorHPBackground(), 2);
 		}
 		else if (mode.equals(MapleXPBarMode.MULTI_SKILL))
 		{
@@ -417,19 +418,17 @@ class XPBarOverlay extends Overlay
 			int filledWidthXP3 = getBarFillLength(nextLevelXP3 - currentLevelXP3, currentXP3 - currentLevelXP3, adjustedWidth);
 			Color bar3Color = config.shouldAutoPickSkill3Color() ? SkillColor.find(config.skill3()).getColor() : config.colorSkill3();
 
-			drawBar(graphics, adjustedX, adjustedY - height, adjustedWidth, filledWidthXP2, bar2Color, config.colorSkill2Notches(), config.colorSkill2Background());
-			drawBar(graphics, adjustedX, adjustedY - (height * 2), adjustedWidth, filledWidthXP3, bar3Color, config.colorSkill3Notches(), config.colorSkill3Background());
+			Shape bar2 = drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthXP2, bar2Color, config.colorSkill2Notches(), config.colorSkill2Background(), 1);
+			Shape bar3 = drawBar(graphics, adjustedX, adjustedY, adjustedWidth, filledWidthXP3, bar3Color, config.colorSkill3Notches(), config.colorSkill3Background(), 2);
 
 			String tooltip = "";
 			BufferedImage img = shouldDisplaySkillIcon ? skillIconManager.getSkillImage(skill, true) : null;
-			boolean	hoveringBar2 = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY - height
-					&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY;
+			boolean	hoveringBar2 = bar2.contains(client.getMouseCanvasPosition().getX(), client.getMouseCanvasPosition().getY());
 			if (hoveringBar2) {
 				tooltip = getTooltipText(currentXP2, currentLevelXP2, nextLevelXP2);
 				img = shouldDisplaySkillIcon ? skillIconManager.getSkillImage(config.skill2(), true) : null;
 			}
-			boolean	hoveringBar3 = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY - (height * 2)
-					&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY - height;
+			boolean	hoveringBar3 = bar3.contains(client.getMouseCanvasPosition().getX(), client.getMouseCanvasPosition().getY());
 			if (hoveringBar3) {
 				tooltip = getTooltipText(currentXP3, currentLevelXP3, nextLevelXP3);
 				img = shouldDisplaySkillIcon ? skillIconManager.getSkillImage(config.skill3(), true) : null;
@@ -443,8 +442,7 @@ class XPBarOverlay extends Overlay
 
 		String xpText = getTooltipText(currentXP, currentLevelXP, nextLevelXP);
 
-		boolean	hoveringBar = client.getMouseCanvasPosition().getX() >= adjustedX && client.getMouseCanvasPosition().getY() > adjustedY
-				&& client.getMouseCanvasPosition().getX() <= adjustedX + adjustedWidth && client.getMouseCanvasPosition().getY() <= adjustedY + height;
+		boolean	hoveringBar = bar.contains(client.getMouseCanvasPosition().getX(), client.getMouseCanvasPosition().getY());
 
 		if (hoveringBar || config.alwaysShowTooltip()) {
 			BufferedImage img = shouldDisplaySkillIcon ? skillIconManager.getSkillImage(skill, true) : null;
@@ -485,7 +483,13 @@ class XPBarOverlay extends Overlay
 		}
 
 		int threeBarOffset = isThreeBarMode ? barHeight * 2 : 0;
-		int tooltipY = y - threeBarOffset + offsetY;
+		int tooltipY = y + offsetY;
+
+		if (config.isVerticalMode()) {
+			tooltipX -= threeBarOffset;
+		} else {
+			tooltipY -= threeBarOffset;
+		}
 
 		graphics.setColor(config.colorXPText());
 		graphics.drawString(tooltipText, tooltipX, tooltipY);
@@ -509,29 +513,52 @@ class XPBarOverlay extends Overlay
 	 * @param barColor			The color of the fill
 	 * @param notchColor		The color of the notches, or pips
 	 * @param backgroundColor	The background color of the bar, which will show as the border + unfilled area of the bar
+	 * @param stackedBarIndex 	The bar index drawn, starting at 0. So 0 for the first bar, 1 for the second, 2 for the third
+	 * @return Shape, used to check if hovering over a bar
 	 */
-	private void drawBar(Graphics2D graphics, int x, int y, int width, int fillLength, Color barColor, Color notchColor, Color backgroundColor)
+	private Shape drawBar(Graphics2D graphics, int x, int y, int width, int fillLength, Color barColor, Color notchColor, Color backgroundColor, int stackedBarIndex)
 	{
 		int height = config.thickness();
 
 		graphics.setColor(backgroundColor);
+
+		// We only want the bar rotated - the tooltip should remain 'upright' - so undo the rotation after drawing the bar
+		// Also prevents the bar being rotated multiple times if in a three bar mode
+		AffineTransform unrotated = graphics.getTransform();
+		if (config.isVerticalMode()){
+			graphics.rotate(Math.PI / -2, x + width/2, y + height/2);
+		}
+
+		y -= height	* stackedBarIndex;
+
 		graphics.drawRect(x, y, width - BORDER_SIZE, height - BORDER_SIZE);
 		graphics.fillRect(x, y, width, height);
 
 		graphics.setColor(barColor);
+
 		graphics.fillRect(x + BORDER_SIZE,
 				y + BORDER_SIZE,
 				fillLength - BORDER_SIZE * 2,
 				height - BORDER_SIZE * 2);
-
 		graphics.setColor(notchColor);
 
-		//draw the 9 pip separators
+		// Draw the 9 pip separators
 		for (int i = 1; i <= 9; i++)
 		{
-			graphics.fillRect(x + i * (width/10), y + 1,2, height - BORDER_SIZE*2);
+			graphics.fillRect(x + i * (width / 10), y + 1, 2, height - BORDER_SIZE * 2);
 		}
 
+		graphics.setTransform(unrotated);
+
+		if (config.isVerticalMode()){
+			// not working in the rotated graphics, so need to manually adjust for multiskill mode here
+			y += height * stackedBarIndex;
+			x -= height * stackedBarIndex;
+			return AffineTransform.getRotateInstance(Math.PI / -2, x + width/2, y + height/2).createTransformedShape(new Rectangle(x, y, width, height));
+		}
+		else {
+			return new Rectangle(x, y, width - BORDER_SIZE, height - BORDER_SIZE);
+		}
 	}
 
 	/**

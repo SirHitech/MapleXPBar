@@ -182,6 +182,15 @@ public interface MapleXPBarConfig extends Config
 
 	@ConfigItem(
 			position = 8,
+			keyName = "isVerticalMode",
+			name = "Vertical Bar",
+			section = advancedSection,
+			description = "Draw the bar vertically"
+	)
+	default boolean isVerticalMode() { return false; }
+
+	@ConfigItem(
+			position = 9,
 			keyName = "barMode",
 			name = "Bar Mode",
 			section = advancedSection,
@@ -279,7 +288,6 @@ public interface MapleXPBarConfig extends Config
 		return Skill.STRENGTH;
 	}
 
-	@Alpha
 	@ConfigItem(
 			position = 1,
 			keyName = "xpbarSkill2Color",
@@ -340,7 +348,6 @@ public interface MapleXPBarConfig extends Config
 		return Skill.DEFENCE;
 	}
 
-	@Alpha
 	@ConfigItem(
 			position = 6,
 			keyName = "xpbarSkill3Color",
